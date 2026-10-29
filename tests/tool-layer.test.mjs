@@ -25,7 +25,7 @@ const ctx = {
   systemPrompt: { section: (sec) => { sections.push(sec); return () => {} } },
   effect: (fn) => { return () => {} },
   on: () => () => {},
-  inject: (deps, fn) => fn(),
+  inject: (deps, fn) => { if (deps.every(name => ctx[name])) return fn(ctx) },
   logger: { info() {}, warn() {}, error() {} },
   webServer: { register: () => () => {} },
 }

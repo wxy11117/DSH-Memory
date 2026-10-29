@@ -3,10 +3,10 @@
  *
  * 为什么单独一条：`export const inject = ['tools', 'systemPrompt']` 会让 cordis 一直等这个服务；
  * 在没有 @deepseek-ai/dsh-system-prompt 的宿主上，插件会**完全不激活**——连 hp_* 工具都没有，
- * 而用户看到的现象只是「装了没反应」。所以 inject 里只留 `tools`，systemPrompt 改成运行时探测。
+ * 而用户看到的现象只是「装了没反应」。主插件只依赖 tools，提示词在独立 ctx.inject 子插件里等待。
  *
- * 这条测试守的就是那个探测：
- *   · inject 里不得再出现 systemPrompt
+ * 这条轻量测试守的是缺服务时工具可用；真实代理权限与生命周期由 real-cordis.mjs 验证：
+ *   · 主插件 inject 不依赖 systemPrompt，子插件等待它
  *   · 没有 systemPrompt 时：15 个工具照常注册、不注册注入段、日志里说清楚为什么
  *   · 用 hp_digest 手动依然能取到记忆内容（这是缺注入时的兜底路径）
  */
@@ -29,11 +29,12 @@ seedStore.flush()
 
 // ── 假宿主：**故意不提供** systemPrompt ──────────────────────────────────
 const tools = []
+const deferred = []
 const ctx = {
   tools: { register: (def) => { tools.push(def); return () => {} } },
   effect: () => () => {},
   on: () => () => {},
-  inject: (deps, fn) => fn(),
+  inject: (deps, fn) => { deferred.push({ deps, fn }); return {} },
   logger: { info() {}, warn() {}, error() {} },
   webServer: { register: () => () => {} },
 }
@@ -50,11 +51,12 @@ if (!Array.isArray(mod.inject) || mod.inject.includes('systemPrompt')) {
   problems.push(`inject 不该包含 systemPrompt（当前 ${JSON.stringify(mod.inject)}）——否则没这个服务的宿主上插件永不激活`)
 }
 if (!mod.inject.includes('tools')) problems.push('inject 必须声明 tools')
+if (deferred.length !== 1 || !deferred[0].deps.includes('systemPrompt')) problems.push('提示词应在独立子插件里等待 systemPrompt')
 if (tools.length < 10) problems.push(`只注册了 ${tools.length} 个工具（期望 15）`)
 if (!tools.some((t) => t.name === 'hp_digest')) problems.push('没有 hp_digest，缺注入时就没兜底了')
 
 const saidIt = log.some((l) => /systemPrompt/.test(l))
-if (!saidIt) problems.push('没在日志里说明「宿主没提供 systemPrompt」——用户会不知道为什么没有自动注入')
+if (!saidIt) problems.push('没在日志里说明提示词会随 systemPrompt 服务挂载')
 
 // 兜底：手动取记忆，内容必须出得来
 const digest = tools.find((t) => t.name === 'hp_digest')

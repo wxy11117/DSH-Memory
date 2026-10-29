@@ -63,7 +63,7 @@ describe('install.mjs', () => {
     assert.deepEqual(pkg.dsh.profile.bundles, ['other-plugin', NAME]);
     assert.equal(fs.existsSync(linkAt(dir)), true);
     assert.equal(fs.realpathSync.native(linkAt(dir)).toLowerCase(), fs.realpathSync.native(ROOT).toLowerCase());
-    assert.match(r.out, /装好了/);
+    assert.match(r.out, /安装登记与静态自检通过/);
     assert.match(r.out, /重启 DSH/);
   });
 

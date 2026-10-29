@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - name: 引擎单元测试
+      - name: 单元和集成测试（含严格服务依赖回归）
         run: npm test
       - name: 包自洽自检（manifest / 入口 / cordis.patch.yml / peer）
         run: npm run check:plugin
@@ -32,12 +32,13 @@ jobs:
         run: npm run smoke
       - name: 兼容性冒烟（宿主没有 systemPrompt 时不能整个插件哑掉）
         run: npm run smoke:noprompt
-      - name: 真加载器 / 真宿主契约（没设 DSH_HOST_MODULES 时自动跳过）
+      - name: 可选真实宿主验收（未提供宿主时跳过，不代表启动已验证）
         # 想在这跑真的：把宿主的 @deepseek-ai/* 解到某个目录，然后加
         #   env: { DSH_HOST_MODULES: ${{ runner.temp }}/hp-host/node_modules/@deepseek-ai }
         run: |
           npm run test:loader
           npm run test:real
+          npm run test:cordis
       - name: 当库用的示例
         run: npm run example -- --temp
       - name: CLI 自检

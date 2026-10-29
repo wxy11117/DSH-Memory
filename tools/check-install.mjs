@@ -208,7 +208,7 @@ if (isMain) {
   } else {
     printResults();
     console.log('');
-    if (!bads.length) console.log(`结论：可以加载${warns.length ? `（${warns.length} 条注意项）` : ''}。改完记得重启 DSH。`);
+    if (!bads.length) console.log(`结论：静态检查通过${warns.length ? `（${warns.length} 条注意项）` : ''}。尚未执行 DSH 启动；重启后需确认插件激活。`);
     else console.log(`结论：还装不上——${bads.length} 项要修${warns.length ? `，另有 ${warns.length} 条注意项` : ''}。`);
   }
 

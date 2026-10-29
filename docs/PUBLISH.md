@@ -20,11 +20,12 @@ node tests/smoke-host.mjs
 node tests/smoke-noprompt.mjs
 node tests/real-loader.mjs
 node tests/real-host.mjs
+node tests/real-cordis.mjs
 node tools/pack.mjs
 node tools/release-check.mjs --zip
 ```
 
-real-host 和 real-loader 需要 DSH_HOST_MODULES 指向真实宿主依赖。Windows 包装器测试仅在 Windows 上执行，其他平台明确跳过。
+real-host、real-loader 和 real-cordis 需要 DSH_HOST_MODULES 指向真实宿主依赖。发布前这三项必须实际执行；未设置环境变量导致的跳过不能算验收通过。real-loader 只检查入口树合成，real-host 使用部分模拟上下文，均不能代替 real-cordis 的真实服务代理与生命周期测试。Windows 包装器测试仅在 Windows 上执行，其他平台明确跳过。
 
 使用生成的 ZIP 再解压到全新临时目录，验证安装器、测试及发布检查。不要把个人 profile 或记忆库加入仓库。
 
@@ -33,8 +34,8 @@ real-host 和 real-loader 需要 DSH_HOST_MODULES 指向真实宿主依赖。Win
 1. 同步 package.json、CHANGELOG.md 与 README 的版本和四个仓库链接。
 2. 通过专用打包器产生 ZIP；确认发布检查通过。
 3. 仅将 ZIP 内的发布文件提交到仓库根目录。不要上传整个本地工作目录。
-4. 在对应提交上创建版本标签，例如 v0.1.9。
-5. 创建 Release，上传 dsh-hippocampus-0.1.9.zip 和 SHA256SUMS.txt，填写安装步骤与已知限制。
+4. 在对应提交上创建版本标签，例如 v0.1.10。
+5. 创建 Release，上传 dsh-hippocampus-0.1.10.zip 和 SHA256SUMS.txt，填写安装步骤与已知限制。
 6. 当前作为公开测试版，勾选 Pre-release。确认页面可公开访问，并下载核对 ZIP 的 SHA-256。
 
 公开说明必须注明：新记忆依赖工具写入；提醒不是独立推送；当前保持 followSession=false。

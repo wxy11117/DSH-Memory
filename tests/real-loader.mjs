@@ -6,7 +6,8 @@
  *   · `real-host.mjs`         —— 真实 `defineTool` / `ctx.systemPrompt.section` 的契约（工具 + 注入）
  *   · **`real-loader.mjs`**   —— 真实 `loadProfileDirectory` + `composeEntries`：从 profile 的
  *                                `dsh.profile.bundles` 出发，真的去解析我们的包、读 `dsh.bundle.patch`、
- *                                加载补丁、合成入口树。**这是「装了会不会被加载」的最终证据。**
+ *                                加载补丁、合成入口树。仅验证入口解析，不执行 Cordis 插件激活。
+ *   · `real-cordis.mjs`        —— 真实 Cordis 代理权限、依赖等待、激活、服务更换与卸载。
  *
  * 需要宿主包（从 DSH 桌面版 app.asar 解出来的 @deepseek-ai/*）：
  *   set DSH_HOST_MODULES=C:\path\to\node_modules\@deepseek-ai
@@ -123,4 +124,4 @@ if (typeof boot.evaluatePluginCompatibility === 'function') {
 
 // 7) 清理
 fs.rmSync(tmp, { recursive: true, force: true });
-console.log(`\n✓ 真加载器通过：${pkg.name}@${pkg.version} 会被 DSH 加载成入口 ${ours.id}`);
+console.log(`\n✓ 真实加载树检查通过：${pkg.name}@${pkg.version} 解析成入口 ${ours.id}（启动激活另由 real-cordis 验证）`);

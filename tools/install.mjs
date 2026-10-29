@@ -229,7 +229,7 @@ if (opt.json) {
   printResults();
   console.log('');
   if (!bads.length) {
-    console.log(`✓ 装好了${warns.length ? `（${warns.length} 条注意项）` : ''}。**重启 DSH 生效**，之后对话里会出现 hp_* 工具。`);
+    console.log(`✓ 安装登记与静态自检通过${warns.length ? `（${warns.length} 条注意项）` : ''}。请重启 DSH，并确认 hp_* 工具已激活；本检查不代替宿主启动验证。`);
     if (changedFiles.length) console.log(`  改动：${changedFiles.join('、')}`);
   } else {
     console.log(`✗ 还有 ${bads.length} 项没过——按上面 → 的提示改，或把这段输出贴出来。`);

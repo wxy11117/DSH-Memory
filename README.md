@@ -4,10 +4,12 @@
 
 ## 下载与快速安装
 
-**当前版本：0.1.9 公开测试版。** 已验证 Windows、Node.js 24.19.0，以及 DSH 0.2.0-rc.2 的真实工具、输入事件和加载器契约。运行要求 Node.js 22+；其他宿主版本需要自行验证。
+**当前版本：0.1.10 公开测试版。** 修复 0.1.9 在真实 DSH Desktop 中因未声明服务依赖导致的启动失败。运行要求 Node.js 22+；兼容性基线为 DSH 0.2.0-rc.2。
+
+**请停止安装 0.1.9，改用 0.1.10。** 如果已出现启动失败，请参阅 [启动故障恢复](docs/STARTUP-RECOVERY.md)。
 
 1. 安装并至少启动过一次 DSH，确保已有 profile。
-2. 到 [Releases 下载页面](https://github.com/wxy11117/DSH-Memory/releases/tag/v0.1.9)，下载 `dsh-hippocampus-0.1.9.zip`。
+2. 到 [Releases 下载页面](https://github.com/wxy11117/DSH-Memory/releases/tag/v0.1.10)，下载 `dsh-hippocampus-0.1.10.zip`。
 3. **完整解压**到长期保留的文件夹；不要在 ZIP 预览窗口内运行。
 4. Windows 双击 `tools/install.cmd`，确认安装器最后报告自检成功。安装器会验证本机或 DSH 提供的 Node；找不到可用 Node 22+ 时会给出提示。
 5. 重启 DSH。在对话中要求调用 `hp_remember` 保存一条测试记忆，再调用 `hp_recall` 核对。换新会话后可调用 `hp_digest` 检查记忆是否带入。
@@ -71,7 +73,7 @@ node tools/install.mjs --profile ~/.dsh/profiles/web   # 指定 profile
 node tools/install.mjs --uninstall  # 撤销（记忆库不动）
 ```
 
-它做三件事、并且**装完自己验一遍**（和 `check-install` 同一套判定，绿了才说「装好了」）：
+它完成以下登记与备份，并用 `check-install` 检查文件和配置；宿主启动需要另行验证：
 
 1. 在 profile 的 `dependencies` 里写 `"dsh-hippocampus": "link:<本包绝对路径>"`
 2. 把包名追加进 `dsh.profile.bundles`（**漏了这一步就等于没装，而且没有任何报错**）
@@ -81,20 +83,20 @@ node tools/install.mjs --uninstall  # 撤销（记忆库不动）
 输出长这样：
 
 ```
-插件：dsh-hippocampus@0.1.9
+插件：dsh-hippocampus@0.1.10
 profile：~/.dsh/profiles/web（web）
 
   + dependencies["dsh-hippocampus"]   新：link:/path/to/dsh-hippocampus
   + dsh.profile.bundles               新：在末尾加 "dsh-hippocampus"
   + node_modules/dsh-hippocampus      新：link:/path/to/dsh-hippocampus
 
-  ✓ 装好了。**重启 DSH 生效**，之后对话里会出现 hp_* 工具。
+  ✓ 安装登记与静态自检通过。请重启 DSH，确认 hp_* 工具已激活。
 ```
 
-**重启 DSH**，新会话里就有 `hp_*` 工具了。装完也可以再自检一次：
+**重启 DSH**，确认新会话可调用 `hp_*` 工具。装完也可以再做一次静态自检：
 
 ```bash
-node tools/check-install.mjs     # 只读，逐条说「会不会被加载」，红了给修复命令
+node tools/check-install.mjs     # 只读检查文件与 profile 登记；不代替真实启动验证
 ```
 
 ### ①' 有 `dsh` CLI 的话（服务器版 / 自己搭的）
@@ -112,11 +114,11 @@ dsh plugin --profile web add "link:C:\path\to\dsh-hippocampus"    # Windows
 npm run check        # 或 node tools/check-install.mjs
 ```
 
-它逐条告诉你「会不会被加载」，红了会直接给修复命令。典型输出：
+它逐条检查插件文件和安装登记，红了会给出修复命令；不会执行真实 Cordis 激活。典型输出：
 
 ```
 ── 插件包自身 ──
-  ✓ package.json 可解析  dsh-hippocampus@0.1.9
+  ✓ package.json 可解析  dsh-hippocampus@0.1.10
   ✓ 入口文件存在  ./lib/index.js
   ✓ 导出 apply(ctx, config)  找到 apply
   ✓ 补丁能挂到入口树  1 条补丁 → 1 个入口；首个 id=hippocampus name=dsh-hippocampus
@@ -220,7 +222,7 @@ node tools/migrate.mjs --from "…\某处\brain.json" --from-space "private:<你
 > DSH 0.2 的提示词上下文只有 `agent/scope` 时，插件从 `agent/inbox/claimed` 事件取得当轮用户话语；
 > 其他接入可直接传入 `userText`、`messages` 或 `conversation.messages`。话题按 agent 隔离。
 >
-> **兼容性**：`systemPrompt` **不在** `inject` 里（只有 `tools` 必需）。这不是疏忽——写进 `inject` 会让 cordis 一直等这个服务，在没装 `@deepseek-ai/dsh-system-prompt` 的宿主上插件**根本不激活**，连工具都没有，用户看到的现象只是「装了没反应」。现在改成运行时探测：有就注册注入段，没有就只留工具并在日志里说明。这条路径由 `tests/smoke-noprompt.mjs` 守着。
+> **兼容性**：主插件声明必需服务 `tools`；自动注入通过 `ctx.inject(['systemPrompt'], callback)` 注册独立子插件，并仅在该子插件的上下文中读取服务。缺少提示词服务时工具仍可激活；服务后续出现时才挂载注入段，服务移除时由 Cordis 清理该段。`tests/real-cordis.mjs` 使用真实 Cordis 代理和生命周期验证这些场景。
 
 ## 工具（15 个）
 
@@ -263,6 +265,7 @@ npm run smoke          # 假宿主冒烟：15 个工具注册 + 提示词注入 
 npm run smoke:noprompt # 兼容性：宿主没有 ctx.systemPrompt 时工具照常在、不自动注入
 npm run test:loader    # 真加载器：DSH 的 profile 会把它装成入口吗（需要 DSH_HOST_MODULES）
 npm run test:real      # 真宿主契约：真 defineTool + 真 schema 校验（需要 DSH_HOST_MODULES）
+npm run test:cordis    # 真实服务代理、启动激活与卸载重载（需要 DSH_HOST_MODULES）
 ```
 
 没有 npm 时使用 `node --test tests/*.test.mjs`。测试总数以本次输出为准。
@@ -278,17 +281,18 @@ ZIP 默认生成在包目录的上一层，文件名来自当前版本号。打�
 排除 `.hp-example` 等本地运行数据。检查器会读取 ZIP 的真实条目，解压检查内容、校验 CRC，
 并逐文件核对它是否与当前源码一致。不要把整个工作目录直接压缩作为发布包。
 
-「装上去到底能不能用」有三层证据，越往下越接近真相：
+各类验证的范围不同；入口树和工具契约通过，不能替代启动激活验证：
 
 | 测试 | 用什么 | 证明什么 |
 |---|---|---|
 | `loader.test.mjs`（16） | 我们自己移植的 `applyEntryPatches` | 补丁语义按宿主的规则跑（根插入 / group / 覆盖 / 告警） |
 | **`real-loader.mjs`** | 宿主的 `loadProfileDirectory` + `composeEntries` | **profile 里登记了 → 包被解析 → 补丁被加载 → 入口树里真的多出 `hippocampus` 一行** |
 | `real-host.mjs` | 宿主的 `defineTool` / `parameterSchemaSpecToJsonSchema` / `validateJsonSchemaValue` | 15 个工具的参数 DSL 会被宿主接受、注入段会被宿主渲染 |
+| `real-cordis.mjs` | 真实 Cordis Context、tools、systemPrompt | 两种导出均能激活；服务缺失、后置、替换及插件重载符合预期 |
 
-### 需要 `DSH_HOST_MODULES` 的两个测试怎么跑
+### 需要 `DSH_HOST_MODULES` 的测试怎么跑
 
-假宿主只能证明「我的代码自洽」，证明不了「装进真正的 DSH 能激活」。这两个测试直接加载 DSH 自带的宿主包（同一份代码）。
+三个测试直接加载 DSH 自带的宿主包，其中 `real-cordis` 还实际运行插件生命周期。完整用户 profile 中其他插件的配置与兼容性需要另外核对。
 
 准备宿主包（任选其一）：
 
@@ -305,8 +309,8 @@ npx @electron/asar extract "C:\...\DSH Desktop\resources\app.asar" %TEMP%\hp-asa
 set DSH_HOST_MODULES=%TEMP%\hp-asar\node_modules\@deepseek-ai
 ```
 
-> 这两个（`test:real` / `test:loader`）是**开发者自检**：验证真工具校验器、正式输入事件和真加载器的补丁解释器。
-> 普通使用者不需要跑；装完想确认装好了，跑 `node tools/check-install.mjs` 就够了。
+> `test:real`、`test:loader` 和 `test:cordis` 是开发者验收。发布前必须实际执行，不能把跳过当作通过。
+> 普通使用者可先跑 `node tools/check-install.mjs`，然后重启 DSH，确认插件激活且工具可调用。
 
 `npm run test:loader` 的实际输出（真加载器跑出来的）：
 
@@ -322,7 +326,7 @@ profile：web
 ✓ 真加载器通过：dsh-hippocampus@0.1.3 会被 DSH 加载成入口 hippocampus
 ```
 
-不设 `DSH_HOST_MODULES` 时这两个测试直接跳过（退出码 0），普通用户不受影响。
+不设 `DSH_HOST_MODULES` 时这三个测试会明确跳过（退出码 0）；这个结果不表示宿主启动已验证。普通单测另有不依赖宿主包的严格服务访问回归。
 
 ## 已知限制
 
