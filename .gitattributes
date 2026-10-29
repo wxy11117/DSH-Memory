@@ -1,0 +1,12 @@
+# 让不同系统的 checkout 结果一致；两个 Windows 脚本必须是 CRLF，否则 cmd 会读错行尾
+* text=auto
+
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# 二进制：别让 git 动它们
+*.zip binary
+*.png binary
+*.jpg binary
+*.ico binary

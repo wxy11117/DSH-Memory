@@ -1,0 +1,21 @@
+# ============================================================================
+# dsh-hippocampus —— DSH bundle patch（插件自带的挂载声明）
+# ============================================================================
+# 装上之后，profile 只要在 `dsh.profile.bundles` 里列出本包名即生效：
+#
+#   dsh plugin --profile web add dsh-hippocampus
+#   # 本地开发（不发布也能用）：
+#   dsh plugin --profile web add link:C:\path\to\dsh-hippocampus
+#
+# 组成顺序：每个 bundle 的 patch 按 `dsh.profile.bundles` 顺序叠
+#          → 最后叠 profile 自己那一层的 cordis.patch.yml（只有那层热重载）
+#
+# ⚠️ `id` 就是命名空间：工具名、存储目录、日志前缀都用它。
+# ⚠️ `name` 必须与安装后的**包名**完全一致，否则表现是「装上了但什么都没发生」。
+# ============================================================================
+
+- insert:
+    - id: hippocampus
+      name: dsh-hippocampus
+      config:
+        enabled: true

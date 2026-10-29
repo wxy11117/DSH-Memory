@@ -1,0 +1,48 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: 引擎单元测试
+        run: npm test
+      - name: 包自洽自检（manifest / 入口 / cordis.patch.yml / peer）
+        run: npm run check:plugin
+      - name: 发布前体检（敏感信息 / 必备文件 / 版本号）
+        run: npm run release:check
+      - name: 构建并核对最终 ZIP
+        run: |
+          npm run pack
+          npm run release:check -- --zip
+      - name: 假宿主冒烟（工具注册 / 提示词注入 / 清理）
+        run: npm run smoke
+      - name: 兼容性冒烟（宿主没有 systemPrompt 时不能整个插件哑掉）
+        run: npm run smoke:noprompt
+      - name: 真加载器 / 真宿主契约（没设 DSH_HOST_MODULES 时自动跳过）
+        # 想在这跑真的：把宿主的 @deepseek-ai/* 解到某个目录，然后加
+        #   env: { DSH_HOST_MODULES: ${{ runner.temp }}/hp-host/node_modules/@deepseek-ai }
+        run: |
+          npm run test:loader
+          npm run test:real
+      - name: 当库用的示例
+        run: npm run example -- --temp
+      - name: CLI 自检
+        # 用临时家目录，别往 runner 的 ~/.dsh 里写东西
+        run: |
+          DSH_HOME="$RUNNER_TEMP/dsh-home" node tools/hp.mjs doctor
+          DSH_HOME="$RUNNER_TEMP/dsh-home" node tools/hp.mjs remember "CI 里也能写一条记忆"
+          DSH_HOME="$RUNNER_TEMP/dsh-home" node tools/hp.mjs list

@@ -1,0 +1,13 @@
+# 依赖
+node_modules/
+
+# 临时与本地文件
+*.log
+*.zip
+.DS_Store
+.hp-example/
+brain.json
+brain.json.*
+
+# 测试用的临时/私有探针（不随包发布）
+tests/**/_*.mjs
