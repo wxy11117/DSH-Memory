@@ -1,4 +1,8 @@
-# DSH-Memory 展示网站
+# DSH-Memory 项目官方网站
+
+**官网：https://wxy11117.github.io/DSH-Memory/**
+
+分享这个链接即可查看项目介绍和交互演示，并从页面顶部、底部进入 [GitHub 仓库](https://github.com/wxy11117/DSH-Memory)；安装说明入口位于页面下方。浏览官网无需登录。
 
 暖白未来实验室风格的交互展示站：石墨色粒子大脑、橙红神经脉冲、可调遗忘曲线与三层词语联想。
 
@@ -16,11 +20,20 @@ node website/server.mjs
 
 如果已经进入本目录，也可以运行 `node server.mjs`。不建议直接双击 HTML 文件，浏览器可能限制本地 ES 模块加载。
 
-## 静态托管
+## GitHub Pages 自动发布
+
+仓库 Settings → Pages 的 Source 设为 **GitHub Actions**，由 [pages.yml](../.github/workflows/pages.yml) 发布。
+
+- `main` 分支的 `website/dist/` 或该工作流发生更新时，自动部署。
+- 也可在 Actions → Deploy official website to GitHub Pages → Run workflow 手动发布。
+- 上传的网页根目录为 `website/dist/`，不会将整个插件仓库作为网站根目录。
+- 发布结果在 Actions 和仓库的 `github-pages` 环境中查看；成功后官网更新可能受浏览器/CDN 缓存影响。
+
+## 其他静态托管
 
 将 `website/dist/` 作为站点发布根目录，保持其中的相对路径。网页不需要服务端、数据库或 API 密钥。
 
-上传源码到 GitHub 仓库不会自动开启 GitHub Pages；独立部署时需另行配置发布目录或工作流。
+相对资源路径同时适用于 GitHub Pages 项目子路径。迁移到其他正式域名时，请同步修改 `dist/index.html` 的 canonical 和 `og:url`。
 
 ## 交互
 
