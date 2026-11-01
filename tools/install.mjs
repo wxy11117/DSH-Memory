@@ -23,18 +23,22 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { stagePluginLink } from './plugin-link.mjs';
 import {
   checkPlugin, checkProfile, defaultProfile, results, printResults, resetResults, readJson,
 } from './check-install.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const PLUGIN_DIR = path.resolve(HERE, '..');
 
 const argv = process.argv.slice(2);
-const opt = { profile: null, dry: false, uninstall: false, json: false, help: false };
+const opt = { profile: null, plugin: null, dry: false, uninstall: false, json: false, help: false };
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i];
   if (a === '--profile') opt.profile = argv[++i];
+  else if (a === '--plugin') {
+    opt.plugin = argv[++i];
+    if (!opt.plugin || opt.plugin.startsWith('--')) { console.error('--plugin 需要完整插件目录'); process.exit(2); }
+  }
   else if (a === '--dry' || a === '--dry-run') opt.dry = true;
   else if (a === '--uninstall' || a === '--remove') opt.uninstall = true;
   else if (a === '--json') opt.json = true;
@@ -42,10 +46,13 @@ for (let i = 0; i < argv.length; i++) {
   else { console.error(`未知参数：${a}（--help 看用法）`); process.exit(2); }
 }
 
+const PLUGIN_DIR = opt.plugin ? path.resolve(opt.plugin) : path.resolve(HERE, '..');
+
 if (opt.help) {
   console.log(`用法：
   node tools/install.mjs [--profile <profile 目录>] [--dry] [--json]
   node tools/install.mjs --uninstall [--profile <...>] [--dry]
+  node tools/install.mjs --plugin <保留的旧插件目录> [--profile <...>] [--dry]
 
 不传 --profile 时按顺序找：$DSH_HOME、~/.dsh、%APPDATA%\\dsh-desktop\\harness、$XDG_CONFIG_HOME/dsh-desktop/harness
 （在其下的 profiles/ 里优先取 web，其次 desktop，再到第一个带 package.json 的）。
@@ -66,7 +73,14 @@ function fail(msg, detail) {
 /* ── 1. 本包 ─────────────────────────────────────────────────────────── */
 let pkg;
 try { pkg = readJson(path.join(PLUGIN_DIR, 'package.json')); } catch (e) { fail('读不到本包的 package.json', e.message); }
-if (!pkg.name) fail('本包 package.json 没有 name');
+if (pkg.name !== 'dsh-hippocampus') fail('指定目录不是 dsh-hippocampus 插件包');
+if (opt.plugin) {
+  resetResults();
+  const targetInfo = checkPlugin(PLUGIN_DIR);
+  const targetErrors = results.filter(row => row.level === 'bad');
+  if (!targetInfo || targetErrors.length) fail('指定插件目录不完整，未修改安装登记', targetErrors.map(row => row.title).join('；'));
+  resetResults();
+}
 
 /* ── 2. profile ──────────────────────────────────────────────────────── */
 const profileDir = opt.profile ? path.resolve(opt.profile) : defaultProfile();
@@ -97,10 +111,10 @@ let linkState = 'missing';
 try {
   const st = fs.lstatSync(linkPath);
   linkState = st.isSymbolicLink() ? 'link' : 'dir';
-  if (linkState === 'link' && path.resolve(fs.readlinkSync(linkPath)) === PLUGIN_DIR) linkState = 'ours';
-} catch { /* 不存在 */ }
+  if (linkState === 'link' && path.resolve(path.dirname(linkPath), fs.readlinkSync(linkPath)) === PLUGIN_DIR) linkState = 'ours';
+} catch (error) { if (error.code !== 'ENOENT') fail('读取现有插件链接失败', error.message); }
 if (linkState === 'ours') plan.push({ act: 'skip', what: `node_modules/${pkg.name}`, why: '链接已指向本包' });
-else plan.push({ act: 'link', what: `node_modules/${pkg.name}`, to: linkState === 'missing' ? wantSpec : `替换现有${linkState === 'dir' ? '目录' : '链接'} → ${PLUGIN_DIR}` });
+else plan.push({ act: 'link', what: `node_modules/${pkg.name}`, to: linkState === 'missing' ? wantSpec : `替换现有${linkState === 'dir' ? '目录（保留为备份）' : '链接（只移除链接自身）'} → ${PLUGIN_DIR}` });
 
 const uninstallPlan = opt.uninstall ? [
   { act: 'del', what: `dependencies["${pkg.name}"]`, from: curSpec ?? '（本来就没有）' },
@@ -162,24 +176,34 @@ if (effective.length) {
     ppkg.dsh.profile.bundles = list;
   }
 
-  try {
-    fs.writeFileSync(profilePkgPath, JSON.stringify(ppkg, null, 2) + '\n', 'utf8');
-    changedFiles.push('package.json');
-  } catch (e) { fail('写 profile/package.json 失败', e.message); }
-
-  // node_modules 链接
+  // Prepare the new link before changing registration. Keep the old entry
+  // available for rollback; a junction must never be passed to recursive rm.
+  let linkChange;
+  let registrationAttempted = false;
   try {
     fs.mkdirSync(path.dirname(linkPath), { recursive: true });
+    if (!opt.uninstall && linkState !== 'ours') linkChange = stagePluginLink(linkPath, PLUGIN_DIR);
+    registrationAttempted = true;
+    fs.writeFileSync(profilePkgPath, JSON.stringify(ppkg, null, 2) + '\n', 'utf8');
+    changedFiles.push('package.json');
     if (opt.uninstall) {
       if (linkState === 'ours') { fs.unlinkSync(linkPath); changedFiles.push('node_modules/' + pkg.name + '（已删）'); }
-    } else {
-      if (linkState !== 'ours') {
-        if (linkState !== 'missing') fs.rmSync(linkPath, { recursive: true, force: true });
-        fs.symlinkSync(PLUGIN_DIR, linkPath, process.platform === 'win32' ? 'junction' : 'dir');
-        changedFiles.push('node_modules/' + pkg.name + '（新链接）');
+    } else if (linkChange) {
+      const retained = linkChange.commit();
+      changedFiles.push('node_modules/' + pkg.name + '（新链接）');
+      if (retained) {
+        changedFiles.push('node_modules/' + path.basename(retained) + '（旧目录备份，已保留）');
+        say('  已保留旧目录备份：' + retained);
       }
     }
-  } catch (e) { fail('建 node_modules 链接失败', e.message); }
+  } catch (e) {
+    const problems = [e.message];
+    try { linkChange?.rollback(); } catch (restoreError) { problems.push('链接回退：' + restoreError.message); }
+    if (registrationAttempted) {
+      try { fs.copyFileSync(bak, profilePkgPath); } catch (restoreError) { problems.push('登记回退：' + restoreError.message); }
+    }
+    fail('安装变更未完成', problems.join('；'));
+  }
 }
 
 /* ── 6. 自己验一遍（和 check-install 同一套判定）──────────────────────── */

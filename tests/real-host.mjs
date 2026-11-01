@@ -61,12 +61,12 @@ async function mount(config, homeOverride) {
   return { registered, sections, effects, ctx }
 }
 
-/* ── 1. tool 模式（显式关掉自动注入）：15 个工具、不注册注入段 ── */
+/* ── 1. tool 模式（显式关掉自动注入）：16 个工具、不注册注入段 ── */
 const a = await mount({ space: 'real-tool', injectMode: 'tool' })
 const names = a.registered.map((t) => t.name)
 console.log(`\n[tool 模式] 工具 ${names.length} 个：${names.join(', ')}`)
-if (names.length !== 15) {
-  console.error(`✗ 期望 15 个工具，实际 ${names.length}`)
+if (names.length !== 16) {
+  console.error(`✗ 期望 16 个工具，实际 ${names.length}`)
   process.exit(1)
 }
 console.log(`[tool 模式] systemPrompt.section ${a.sections.length} 个（期望 0：显式 tool 不注入）`)
@@ -175,4 +175,4 @@ if (!topicBody.includes('【这会儿想起来的】') || !topicBody.includes('�
 console.log('✓ 正式 claimed 事件 → 真实 agent/scope 上下文 → 话题检索')
 
 console.log(`\n家目录：${path.join(home, 'hippocampus')}`)
-console.log('\n✓ 真宿主契约通过（15 工具 / schema / 入参校验 / 实跑 / 注入段）')
+console.log('\n✓ 真宿主契约通过（16 工具 / schema / 入参校验 / 实跑 / 注入段）')

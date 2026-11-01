@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light"><meta name="theme-color" content="#f7f2e9"><meta name="description" content="大肥鱼记忆活动面板：看见每一次记下、想起与归纳。所有数据留在本机。">
+  <title>记忆观测台 · 大肥鱼 DSH-Memory</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="warm.css">
+  <script src="demo.js" defer></script><script src="network.js" defer></script><script src="app.js" defer></script>
+</head>
+<body>
+<svg class="icon-defs" aria-hidden="true"><defs>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+  <symbol id="i-net" viewBox="0 0 24 24"><path d="m7 7 10 1M6 9l4 9m8-8-6 8"/><circle cx="5" cy="5" r="3"/><circle cx="19" cy="8" r="3"/><circle cx="11" cy="20" r="3"/></symbol>
+  <symbol id="i-stack" viewBox="0 0 24 24"><path d="m12 3 10 5-10 5L2 8l10-5ZM2 12l10 5 10-5M2 16l10 5 10-5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-cycle" viewBox="0 0 24 24"><path d="M20 8a8 8 0 0 0-14-2L3 9m0-6v6h6M4 16a8 8 0 0 0 14 2l3-3m0 6v-6h-6"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><path d="M4 8v13h16V8M3 3h18v5H3V3Zm6 9h6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v3"/></symbol>
+</defs></svg>
+<aside class="sidebar">
+  <a class="brand" href="#overview" aria-label="大肥鱼记忆首页"><svg class="brand-mark" viewBox="0 0 42 42" aria-hidden="true"><path d="M21 9c-6-8-16-1-13 6-8 3-5 15 3 14 1 9 10 8 10 2V9Zm0 0c6-8 16-1 13 6 8 3 5 15-3 14-1 9-10 8-10 2V9Z"/><path d="M12 14l9 7 9-7M11 29l10-8 10 8"/><circle cx="21" cy="21" r="3"/><circle cx="12" cy="14" r="2"/><circle cx="30" cy="14" r="2"/></svg><span>大肥鱼记忆<small>MEMORY OBSERVATORY</small></span></a>
+  <div class="nav-caption">我的记忆空间</div>
+  <nav aria-label="主导航">
+    <button class="nav-item active" data-page="overview"><svg><use href="#i-grid"/></svg>每日概览<span class="nav-dot"></span></button>
+    <button class="nav-item" data-page="network"><svg><use href="#i-net"/></svg>词语关系网<span class="nav-count" id="navWords">—</span></button>
+    <button class="nav-item" data-page="memories"><svg><use href="#i-stack"/></svg>记忆库<span class="nav-count" id="navTotal">—</span></button>
+  </nav>
+  <div class="sidebar-note"><img class="mascot-friend" src="dafeiyu-mascot.webp" alt="大肥鱼：蓝发、白色头饰和鲸鱼尾巴的卡通形象" width="140" height="140" decoding="async" draggable="false"><strong>今天也有好好记住。</strong><p>小小的经历，<br>慢慢长成我们的记忆。</p><button id="demoButton">逛逛示例小脑袋 <span>↗</span></button></div>
+  <div class="sidebar-bottom"><button id="importButton"><svg><use href="#i-plus"/></svg>打开本地脑文件</button><button id="helpButton"><svg><use href="#i-info"/></svg>面板使用说明</button><div class="local-badge"><svg><use href="#i-lock"/></svg>只在你的电脑上</div><small>DSH-Memory · Activity Preview</small></div>
+</aside>
+<div class="workspace">
+  <header class="topbar"><div class="breadcrumb">记忆工作台 <span>/</span> <strong id="breadcrumb">每日概览</strong></div><div class="topbar-right"><span class="connection" id="connection"><i></i>尚未连接</span><select id="spaceSelect" aria-label="记忆空间"><option>默认记忆空间</option></select><button class="icon-button" id="refreshButton" title="刷新数据" aria-label="刷新数据"><svg><use href="#i-cycle"/></svg></button></div></header>
+  <main>
+    <div class="hero"><div><div class="eyebrow"><span></span> EVERY MEMORY LEAVES A TRACE</div><h1 id="pageTitle">今天，记住了什么<span>。</span></h1><p id="pageSubtitle">从记下一件小事，到想起一段经历。看见记忆的每一步。</p></div><div class="hero-actions"><button class="button" id="privacyButton" aria-pressed="false"><svg><use href="#i-eye"/></svg><span>显示内容</span></button><button class="button primary" id="exportButton"><svg><use href="#i-down"/></svg>导出日报</button></div></div>
+    <div id="notice" class="notice"><svg><use href="#i-info"/></svg><span>从插件调用 hp_dashboard，或打开本地脑文件开始查看。历史活动不会凭空补写。</span><button id="reconnectButton" hidden>返回本机数据</button></div>
+    <div class="datebar"><div class="date-controls"><button id="prevDay" aria-label="前一天">‹</button><input id="dayInput" type="date" aria-label="选择活动日期"><button id="nextDay" aria-label="后一天">›</button><button class="today-button" id="todayButton">今天</button></div><span class="refresh-label" id="updatedAt">等待连接</span></div>
+    <section class="stats-grid" aria-label="记忆活动摘要">
+      <article class="stat-card"><div class="stat-label">当前活跃记忆 <svg><use href="#i-stack"/></svg></div><div class="stat-value" id="totalValue">—</div><div class="stat-foot"><span class="tiny-dot mint"></span><span id="totalFoot">当前记忆库的状态</span></div><div class="stat-mini tiers-mini" id="tiersMini"></div></article>
+      <article class="stat-card"><div class="stat-label">当日新增 <svg><use href="#i-plus"/></svg></div><div class="stat-value" id="addedValue">—</div><div class="stat-foot" id="addedFoot">接入后开始记录</div><svg class="stat-mini spark" id="addedSpark" viewBox="0 0 110 35" aria-hidden="true"></svg></article>
+      <article class="stat-card"><div class="stat-label">当日成功回忆 <svg><use href="#i-cycle"/></svg></div><div class="stat-value" id="recallValue">—</div><div class="stat-foot" id="recallFoot">按记忆条目次数计</div><svg class="stat-mini spark violet" id="recallSpark" viewBox="0 0 110 35" aria-hidden="true"></svg></article>
+      <article class="stat-card"><div class="stat-label">当日归档 <svg><use href="#i-archive"/></svg></div><div class="stat-value" id="archiveValue">—</div><div class="stat-foot" id="archiveFoot">归档仍可供检索</div><div class="archive-mark" aria-hidden="true">↘</div></article>
+    </section>
+    <div class="main-grid">
+      <section class="panel timeline-panel"><div class="panel-header"><div><h2>记忆的一天 <span class="counter" id="eventCounter">0</span></h2><p id="dailySummary">还没有活动记录</p></div><span class="live-tag" id="timelineMode">活动时间线</span></div><div class="timeline-toolbar"><div class="filter-tabs" role="group" aria-label="活动类型"><button class="selected" data-filter="all">全部</button><button data-filter="new">记下</button><button data-filter="recall">想起</button><button data-filter="organize">整理</button></div><label class="search-box"><svg><use href="#i-search"/></svg><input id="searchInput" placeholder="搜索活动" aria-label="搜索活动"></label></div><div id="timeline" class="timeline" aria-live="polite"></div><div class="panel-footer"><span id="trackingSince">只展示真实记录，不回填过去</span><span>点击活动查看详情 ↗</span></div></section>
+      <section class="panel graph-panel"><div class="panel-header"><div><h2>每个词，都有回响</h2><p><span id="graphStats">词语之间的连接</span></p></div><button id="expandGraph" class="icon-button" aria-label="展开词语关系网" title="展开关系网">↗</button></div><div class="graph-focus"><span>三维联想中心</span><strong id="graphCoreName">等待记忆</strong><small id="graphCoreReason">来自较重要的记忆</small></div><div class="graph-toolbar"><select id="wordSelect" aria-label="选择词语节点"><option value="">选择一个词语</option></select><button id="growDemo" hidden>演示生长</button><button id="expandBranches">展开更多</button><button id="collapseBranches" hidden>收回三层</button><button id="rotateLeft" aria-label="向左旋转关系图">↶</button><button id="rotateRight" aria-label="向右旋转关系图">↷</button><button id="pauseGraph" aria-pressed="true">暂停旋转</button><button id="resetGraph">回到核心</button></div><div class="graph-wrap"><div class="graph-aura"></div><canvas id="networkCanvas" tabindex="0" role="img" aria-label="三维星光差序联想图。拖动查看前后球层，滚轮缩放，点击星光或词语向三维空间扩散。"></canvas><div id="graphEmpty" class="graph-empty">等待第一条连接</div><div id="graphTooltip" class="graph-tooltip" hidden></div><div class="graph-coordinate">拖动查看前后 · 滚轮缩放 · 点击星光扩散</div></div><div id="wordDetails" class="word-details"><span class="tiny-dot mint"></span>点击一个词，看看它连接了哪些记忆。</div><div class="graph-legend association-legend"><span><i class="ring-core"></i>核心</span><span><i class="ring-one"></i>一层</span><span><i class="ring-two"></i>二层</span><span><i class="ring-three"></i>三层及外层</span><small>三维球层 · 由近及远，逐层淡化</small></div><div class="graph-scope" id="graphScope" aria-live="polite"></div><div class="graph-growth" id="graphGrowth" role="status"></div><div class="graph-model-note">距离与分组依据共现连接 · 波纹为联想示意，不会写入或强化记忆</div></section>
+      <section class="panel trend-panel"><div class="panel-header"><div><h2>一周的记忆足迹</h2><p>所选日期及前六天 · 已记录活动次数</p></div><span class="muted">7 DAYS</span></div><div class="trend-chart" id="trendChart"></div></section>
+      <section class="panel layers-panel"><div class="panel-header"><div><h2>记忆的四种停留</h2><p>按稳定性 S 分层 · 当前状态</p></div><svg class="small-icon"><use href="#i-stack"/></svg></div><div id="layerList" class="layer-list"></div><div class="layer-note">“永久”是高稳定性档位，仍会参与衰减计算。</div></section>
+    </div>
+    <section class="panel memory-panel" hidden><div class="panel-header"><div><h2>当前记忆库</h2><p id="memoryCount">展示未封存的活跃与归档记忆</p></div><label class="search-box"><svg><use href="#i-search"/></svg><input id="memorySearch" placeholder="搜索记忆内容" aria-label="搜索记忆内容"></label></div><div class="memory-filters"><button class="selected" data-memory="all">全部</button><button data-memory="active">活跃</button><button data-memory="archive">归档</button><button data-memory="semantic">归纳</button><button data-memory="pinned">钉住</button></div><div id="memoryGrid" class="memory-grid"></div></section>
+    <footer class="main-footer"><span><span class="footer-orb"></span>大肥鱼记忆 · 每一次想起，都有来处</span><span id="footerStatus">内容留在本机 · 面板不修改记忆</span></footer>
+  </main>
+</div>
+<input type="file" id="fileInput" accept=".json,application/json" hidden>
+<dialog id="detailsDialog"><div class="dialog-top"><span class="eyebrow">MEMORY DETAILS</span><button class="icon-button" id="closeDialog" aria-label="关闭详情">×</button></div><div id="dialogBody"></div></dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>

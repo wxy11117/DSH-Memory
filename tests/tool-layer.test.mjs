@@ -44,8 +44,8 @@ const call = async (name, args = {}) => {
 
 let rememberedId = ''
 
-test('15 个工具都在（少一个说明注册失败）', () => {
-  assert.equal(tools.length, 15, `实际 ${tools.length} 个：${tools.map((t) => t.name).join(', ')}`)
+test('16 个工具都在（少一个说明注册失败）', () => {
+  assert.equal(tools.length, 16, `实际 ${tools.length} 个：${tools.map((t) => t.name).join(', ')}`)
 })
 
 test('hp_remember 真能写进去，并返回 id / 层 / 分类', async () => {

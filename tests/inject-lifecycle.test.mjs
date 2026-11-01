@@ -44,7 +44,7 @@ for (const [kind, plugin] of [['namespace', module], ['default', module.default]
     assert.deepEqual(plugin.inject, ['tools']);
     const f = strictMount(t, plugin);
     assert.equal(f.unauthorized, 0);
-    assert.equal(f.tools.size, 15);
+    assert.equal(f.tools.size, 16);
     assert.equal(f.sections.length, 0);
     assert.equal(f.pending.length, 1);
     assert.deepEqual(f.pending[0].deps, ['systemPrompt']);
@@ -59,7 +59,7 @@ for (const [kind, plugin] of [['namespace', module], ['default', module.default]
 
 test('tool mode never reads or subscribes to the optional prompt service', (t) => {
   const f = strictMount(t, module.default, { injectMode: 'tool' });
-  assert.equal(f.tools.size, 15);
+  assert.equal(f.tools.size, 16);
   assert.equal(f.pending.length, 0);
   assert.equal(f.unauthorized, 0);
 });

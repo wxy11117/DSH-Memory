@@ -1,5 +1,5 @@
 /**
- * install-flow.test.mjs —— `tools/install.mjs` 的端到端测试（不 spawn 子进程，直接调函数）。
+ * install-flow.test.mjs —— 用独立包副本和临时 profile 跑安装器子进程。
  *
  * 守的是一条链：**别人下载 zip → 跑一条命令 → DSH 重启后工具就在**。
  * 这条链上最容易错的三处都在这里测：
@@ -7,16 +7,17 @@
  *   2. `node_modules/<包名>` 的链接是否真指向本包（Windows 上要用 junction）
  *   3. 撤销后有没有留下残渣（依赖、bundles、链接）
  */
-import { test, describe, before, after } from 'node:test';
+import { test, describe, after } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { createPackageFixture } from './helpers/package-fixture.mjs';
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(HERE, '..');
+const fixture = createPackageFixture('hp-install-package-');
+after(() => fixture.close());
+const ROOT = fixture.packageDir;
 const INSTALLER = path.join(ROOT, 'tools', 'install.mjs');
 const NAME = 'dsh-hippocampus';
 
@@ -32,7 +33,7 @@ function run(args, env = {}) {
 }
 
 function makeProfile({ bundles = ['other-plugin'], withDeps = {} } = {}) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hp-prof-'));
+  const dir = fs.mkdtempSync(path.join(fixture.root, 'profile-'));
   const pkg = { name: 'test-profile', version: '1.0.0', dependencies: { ...withDeps } };
   if (bundles !== null) pkg.dsh = { profile: { bundles: [...bundles] } };
   fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify(pkg, null, 2) + '\n');
@@ -113,6 +114,7 @@ describe('install.mjs', () => {
     assert.deepEqual(pkg.dsh.profile.bundles, ['other-plugin']);
     assert.equal(fs.existsSync(linkAt(dir)), false);
     assert.match(r.out, /撤销/);
+    assert.equal(fs.existsSync(path.join(ROOT, 'package.json')), true, '卸载不能删除源包');
   });
 
   test('--uninstall --dry 不会删东西', () => {
@@ -139,5 +141,62 @@ describe('install.mjs', () => {
     const r = run(['--help']);
     assert.equal(r.code, 0);
     assert.match(r.out, /--uninstall/);
+  });
+
+  test('替换旧 junction 保留旧源包、脑文件、桥接配置和其它依赖', () => {
+    const old = path.join(fixture.root, 'old-plugin');
+    fs.mkdirSync(old);
+    const sentinel = path.join(old, 'sentinel.txt');
+    fs.writeFileSync(sentinel, 'old source stays intact');
+    const dir = makeProfile({ withDeps: { [NAME]: 'link:' + old.replace(/\\/g, '/'), other: '1.0.0' } });
+    const brain = path.join(dir, 'brain.json'), patch = path.join(dir, 'cordis.patch.yml');
+    fs.writeFileSync(brain, '{"testMemory":"keep"}');
+    fs.writeFileSync(patch, '- id: hippocampus\n  config:\n    space: test-space\n');
+    fs.symlinkSync(old, linkAt(dir), process.platform === 'win32' ? 'junction' : 'dir');
+    const result = run(['--profile', dir]);
+    assert.equal(result.code, 0, result.err);
+    assert.equal(fs.readFileSync(sentinel, 'utf8'), 'old source stays intact');
+    assert.equal(fs.readFileSync(brain, 'utf8'), '{"testMemory":"keep"}');
+    assert.equal(fs.readFileSync(patch, 'utf8'), '- id: hippocampus\n  config:\n    space: test-space\n');
+    assert.equal(readPkg(dir).dependencies.other, '1.0.0');
+    assert.equal(fs.realpathSync(linkAt(dir)), fs.realpathSync(ROOT));
+  });
+
+  test('替换真实安装目录时保留原目录备份', () => {
+    const dir = makeProfile();
+    fs.mkdirSync(linkAt(dir));
+    fs.writeFileSync(path.join(linkAt(dir), 'old-content.txt'), 'preserve installed files');
+    const result = run(['--profile', dir, '--json']);
+    assert.equal(result.code, 0, result.err);
+    const backup = fs.readdirSync(path.join(dir, 'node_modules')).find(name => name.startsWith(NAME + '.hp-backup-'));
+    assert.ok(backup);
+    assert.equal(fs.readFileSync(path.join(dir, 'node_modules', backup, 'old-content.txt'), 'utf8'), 'preserve installed files');
+    assert.equal(JSON.parse(result.out).ok, true);
+  });
+
+  test('可用新安装器切回指定旧目录，不需要运行旧版清理代码', () => {
+    const previous = createPackageFixture('hp-previous-');
+    try {
+      const dir = makeProfile();
+      assert.equal(run(['--profile', dir]).code, 0);
+      const snapshot = fs.readFileSync(path.join(ROOT, 'package.json'));
+      const result = run(['--profile', dir, '--plugin', previous.packageDir]);
+      assert.equal(result.code, 0, result.err);
+      assert.equal(fs.realpathSync(linkAt(dir)), fs.realpathSync(previous.packageDir));
+      assert.deepEqual(fs.readFileSync(path.join(ROOT, 'package.json')), snapshot);
+      fs.unlinkSync(linkAt(dir));
+    } finally { previous.close(); }
+  });
+
+  test('指定不完整的旧包时，在改动 profile 前拒绝安装', () => {
+    const incomplete = path.join(fixture.root, 'incomplete-package');
+    fs.mkdirSync(incomplete);
+    fs.writeFileSync(path.join(incomplete, 'package.json'), JSON.stringify({ name: NAME, version: '0.1.10' }));
+    const dir = makeProfile();
+    const before = fs.readFileSync(path.join(dir, 'package.json'));
+    const result = run(['--profile', dir, '--plugin', incomplete]);
+    assert.equal(result.code, 1);
+    assert.deepEqual(fs.readFileSync(path.join(dir, 'package.json')), before);
+    assert.equal(fs.existsSync(linkAt(dir)), false);
   });
 });

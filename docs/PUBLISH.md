@@ -33,12 +33,16 @@ real-host、real-loader 和 real-cordis 需要 DSH_HOST_MODULES 指向真实宿�
 
 1. 同步 package.json、CHANGELOG.md 与 README 的版本和四个仓库链接。
 2. 通过专用打包器产生 ZIP；确认发布检查通过。
-3. 仅将 ZIP 内的发布文件提交到仓库根目录。不要上传整个本地工作目录。
-4. 在对应提交上创建版本标签，例如 v0.1.10。
-5. 创建 Release，上传 dsh-hippocampus-0.1.10.zip 和 SHA256SUMS.txt，填写安装步骤与已知限制。
+3. 仅用 ZIP 内的发布文件更新仓库中的插件文件。保留官网 website/、官网部署工作流及已有下载历史；不要上传整个本地工作目录，也不要删除 ZIP 以外的仓库文件。
+4. 在对应提交上创建版本标签 v0.2.0-preview.3，确认标签中的 package.json 版本一致。
+5. 创建 Release，上传 dsh-hippocampus-0.2.0-preview.3.zip 和本次生成的 SHA256SUMS.txt，填写安装步骤与已知限制。若附件上传不可用，可将这两个文件放到 downloads/，使用固定到发布提交的链接。
 6. 当前作为公开测试版，勾选 Pre-release。确认页面可公开访问，并下载核对 ZIP 的 SHA-256。
 
 公开说明必须注明：新记忆依赖工具写入；提醒不是独立推送；当前保持 followSession=false。
+
+当前应作为公开测试版发布。Windows / DSH 0.2.0-rc.2 的本机验证不能等同于全部系统和后续宿主版本兼容。面板默认本地模式每 60 秒读取状态，运行时只监听本机；面板刷新不额外调用大模型。强杀或断电仍可能丢失尚未保存的记忆。
+
+preview.2 及旧安装器含有已知目录链接清理风险。新用户应下载本版；回退旧插件时仍使用本版安装器的 -Plugin 参数，不重新运行旧安装器。
 
 ## 隐私
 

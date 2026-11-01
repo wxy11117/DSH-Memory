@@ -19,8 +19,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
-import * as hp from '../lib/hippocampus.js'
+import * as hpEngine from '../lib/hippocampus.js'
 import { createStore } from '../lib/store.js'
+import { createActivityJournal, instrumentEngine } from '../lib/activity.mjs'
 
 const argv = process.argv.slice(2)
 const flag = (name, dflt = '') => {
@@ -41,6 +42,8 @@ const homeDir = homeFlag ? path.resolve(homeFlag) : path.join(dshHome, 'hippocam
 
 const store = createStore({ dir: homeDir, log: (m) => process.env.HP_DEBUG && console.log(`[store] ${m}`) })
 store.load()
+const activity = createActivityJournal({ dir: homeDir })
+const hp = instrumentEngine(hpEngine, { journal: activity, space: () => spaceFlag, onMutation: () => store.touch() })
 const st = store.stateFor(spaceFlag)
 const b = hp.ensureBrain(st)
 const line = (s) => console.log(s)

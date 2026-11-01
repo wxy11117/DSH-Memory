@@ -11,3 +11,7 @@ brain.json.*
 
 # 测试用的临时/私有探针（不随包发布）
 tests/**/_*.mjs
+
+# Local activity data
+activity/
+*.jsonl

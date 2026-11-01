@@ -15,18 +15,18 @@
  *
  * 做法：造一个临时 Harness home：
  *   %TEMP%\hp-loader-<rand>\profiles\web\package.json   → bundles: ["dsh-hippocampus"]
- *   %TEMP%\hp-loader-<rand>\profiles\web\node_modules\dsh-hippocampus → 指向本仓库
+ *   %TEMP%\hp-loader-<rand>\profiles\web\node_modules\dsh-hippocampus → 指向临时包副本
  * 然后调真加载器，断言：
  *   1. profile.layers 里正好一层，packageName 是我们
- *   2. 补丁路径解析到我们仓库里的 cordis.patch.yml
+ *   2. 补丁路径解析到临时包副本里的 cordis.patch.yml
  *   3. composeEntries 之后入口树里有 id=hippocampus / name=dsh-hippocampus
  *   4. 宿主没有产生任何告警，也没有 skippedBundles
  */
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { createPackageFixture } from './helpers/package-fixture.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..');
@@ -44,7 +44,10 @@ if (!fs.existsSync(bootEntry)) {
 }
 const boot = await import(pathToFileURL(bootEntry).href);
 
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hp-loader-'));
+const fixture = createPackageFixture('hp-loader-');
+const tmp = fixture.root;
+const packageDir = fixture.packageDir;
+try {
 const profileDir = path.join(tmp, 'profiles', 'web');
 fs.mkdirSync(path.join(profileDir, 'node_modules'), { recursive: true });
 
@@ -53,13 +56,14 @@ fs.writeFileSync(path.join(profileDir, 'package.json'), JSON.stringify({
   name: 'hp-loader-profile',
   version: '1.0.0',
   private: true,
-  dependencies: { [pkg.name]: 'link:' + ROOT },
+  dependencies: { [pkg.name]: 'link:' + packageDir },
   dsh: { profile: { bundles: [pkg.name] } },
 }, null, 2) + '\n');
 
 // 2) 包在 profile 的 node_modules 里（和 install.mjs 装出来的结构一致）
 const linkPath = path.join(profileDir, 'node_modules', pkg.name);
-fs.symlinkSync(ROOT, linkPath, process.platform === 'win32' ? 'junction' : 'dir');
+// The source checkout must never be a cleanup target, even on a failing assertion.
+fs.symlinkSync(packageDir, linkPath, process.platform === 'win32' ? 'junction' : 'dir');
 
 // 3) 走真加载器：resolve 每个 bundle → 读 dsh.bundle.patch → 解析补丁
 const installAnchor = path.join(profileDir, 'package.json');
@@ -70,7 +74,7 @@ try {
   console.error('✗ 真加载器直接抛错（那就说明装上也挂不住）：');
   console.error('  ' + (error?.message ?? error));
   if (error?.cause) console.error('  cause: ' + (error.cause?.message ?? error.cause));
-  process.exit(1);
+  throw error;
 }
 
 console.log(`Harness home：${tmp}`);
@@ -83,15 +87,15 @@ assert.equal(layer.packageName, pkg.name);
 // 宿主给的是 profile/node_modules 里那个链接路径（不是 realpath），所以两边都先解链接再比
 assert.equal(
   fs.realpathSync.native(layer.packageDir).toLowerCase(),
-  fs.realpathSync.native(ROOT).toLowerCase(),
-  '包目录应该解析到本仓库',
+  fs.realpathSync.native(packageDir).toLowerCase(),
+  '包目录应该解析到隔离副本',
 );
 console.log(`  ✓ 我们的包被认出来了：${layer.packageName}@${pkg.version}`);
 
 assert.equal(layer.patchPaths.length, 1, '应该正好一条补丁文件');
 // 同样是经过 node_modules 链接的路径，解链接再比；顺便检查末尾文件名
 assert.equal(fs.realpathSync.native(layer.patchPaths[0]).toLowerCase(),
-  fs.realpathSync.native(path.join(ROOT, 'cordis.patch.yml')).toLowerCase());
+  fs.realpathSync.native(path.join(packageDir, 'cordis.patch.yml')).toLowerCase());
 console.log(`  ✓ 补丁文件：${path.basename(layer.patchPaths[0])}（解析出 ${layer.patches.length} 条补丁行）`);
 
 // 4) 合成入口树——和宿主 boot 时那一次 composeEntries 是同一个函数
@@ -122,6 +126,7 @@ if (typeof boot.evaluatePluginCompatibility === 'function') {
   console.log('  ✓ 兼容性判定：无问题');
 }
 
-// 7) 清理
-fs.rmSync(tmp, { recursive: true, force: true });
 console.log(`\n✓ 真实加载树检查通过：${pkg.name}@${pkg.version} 解析成入口 ${ours.id}（启动激活另由 real-cordis 验证）`);
+} finally {
+  fixture.close();
+}

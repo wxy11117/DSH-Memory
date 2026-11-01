@@ -54,7 +54,8 @@ function writeCmd(file, body) {
 }
 
 function workingShim(file) {
-  writeCmd(file, `"${process.execPath}" %*\nexit /b %errorlevel%`);
+  const electronMode = process.versions.electron ? 'set ELECTRON_RUN_AS_NODE=1\n' : '';
+  writeCmd(file, `setlocal\n${electronMode}"${process.execPath}" %*\nexit /b %errorlevel%`);
 }
 
 function run(f, args = [], throughCmd = false) {
@@ -73,7 +74,10 @@ function run(f, args = [], throughCmd = false) {
 
 test('Windows wrapper runs a real ESM probe and -CheckNode does not install', { skip: !windows }, (t) => {
   const f = fixture(t);
-  f.env.DSH_HIPPOCAMPUS_NODE = process.execPath;
+  // PowerShell does not reliably wait for a GUI-subsystem Electron .exe.
+  // Desktop users run its node.cmd shim, so reproduce that invocation here.
+  workingShim(f.shim);
+  f.env.DSH_HIPPOCAMPUS_NODE = process.versions.electron ? f.shim : process.execPath;
   const r = run(f, ['-CheckNode']);
   assert.equal(r.code, 0, r.out);
   assert.ok(r.out.includes(process.versions.node), r.out);
@@ -134,4 +138,14 @@ test('Windows wrapper passes the installer failure code through install.ps1 and 
     assert.equal(r.code, 37, r.out);
     assert.deepEqual(f.result(), ['--dry', '--profile', profile]);
   }
+});
+
+test('Windows wrapper forwards a rollback target without running its old installer', { skip: !windows }, t => {
+  const f = fixture(t);
+  workingShim(f.shim);
+  const old = path.join(f.base, 'previous plugin with spaces');
+  const profile = path.join(f.base, 'test profile');
+  const r = run(f, ['-Plugin', old, '-Profile', profile, '-Dry'], true);
+  assert.equal(r.code, 0, r.out);
+  assert.deepEqual(f.result(), ['--dry', '--profile', profile, '--plugin', old]);
 });

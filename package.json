@@ -1,6 +1,6 @@
 {
   "name": "dsh-hippocampus",
-  "version": "0.1.10",
+  "version": "0.2.0-preview.3",
   "description": "拟人记忆插件 for DSH：四层记忆 + 遗忘曲线 + 越想起越牢 + 语义归纳 + 水波纹联想；一个 agent 装上就能跨会话记住人和事。",
   "type": "module",
   "main": "lib/index.js",
@@ -22,7 +22,8 @@
     "cordis.patch.yml",
     "README.md",
     "CHANGELOG.md",
-    "LICENSE"
+    "LICENSE",
+    "dashboard"
   ],
   "keywords": [
     "dsh",
@@ -49,7 +50,9 @@
     "release:check": "node tools/release-check.mjs",
     "pack": "node tools/pack.mjs",
     "cli": "node tools/hp.mjs",
-    "doctor": "node tools/hp.mjs doctor"
+    "doctor": "node tools/hp.mjs doctor",
+    "dashboard": "node tools/dashboard.mjs --open",
+    "dashboard:demo": "node tools/dashboard.mjs --demo --open"
   },
   "repository": {
     "type": "git",

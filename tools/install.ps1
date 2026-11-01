@@ -17,6 +17,7 @@ param(
   [switch]$Uninstall,
   [switch]$Dry,
   [string]$Profile,
+  [string]$Plugin,
   [switch]$CheckNode,
   [switch]$Help
 )
@@ -37,6 +38,7 @@ if ($Help) {
   powershell -ExecutionPolicy Bypass -File tools\install.ps1 -Dry            只打印计划，不改文件
   powershell -ExecutionPolicy Bypass -File tools\install.ps1 -Uninstall      撤销
   powershell -ExecutionPolicy Bypass -File tools\install.ps1 -Profile <目录> 指定 profile
+  powershell -ExecutionPolicy Bypass -File tools\install.ps1 -Plugin <目录>  使用本安装器登记指定的旧插件目录
   powershell -ExecutionPolicy Bypass -File tools\install.ps1 -CheckNode      只查「用哪个 node」然后退出
 
 为什么要这个脚本：桌面版 DSH 用户机器上**不一定有 `node` 命令**（DSH 自己是 Electron，
@@ -176,6 +178,7 @@ $extra = @()
 if ($Uninstall) { $extra += '--uninstall' }
 if ($Dry) { $extra += '--dry' }
 if ($Profile) { $extra += @('--profile', $Profile) }
+if ($Plugin) { $extra += @('--plugin', $Plugin) }
 
 try {
   $global:LASTEXITCODE = $null

@@ -1,0 +1,91 @@
+name: publish-preview-3
+
+on:
+  workflow_run:
+    workflows: [test]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-v0.2.0-preview.3
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TAG: v0.2.0-preview.3
+      RELEASE_DIR: downloads/v0.2.0-preview.3
+      PUBLISH_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify the audited package and matching source
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import os from 'node:os';
+          import path from 'node:path';
+          import { createHash } from 'node:crypto';
+          import { execFileSync } from 'node:child_process';
+          import { readZip } from './tools/zip.mjs';
+          import { checkRelease } from './tools/release-check.mjs';
+          const version = '0.2.0-preview.3';
+          const dir = process.env.RELEASE_DIR;
+          const name = 'dsh-hippocampus-' + version + '.zip';
+          const zip = path.resolve(dir, name);
+          const expected = 'f5b873f712bcf75b559aa3b5828298a73d3d5ed35080baa067f8c675b4f699a5';
+          assert.equal(JSON.parse(fs.readFileSync('package.json', 'utf8')).version, version);
+          const data = fs.readFileSync(zip);
+          assert.equal(data.length, 449128);
+          assert.equal(createHash('sha256').update(data).digest('hex'), expected);
+          assert.equal(fs.readFileSync(path.join(dir, 'SHA256SUMS.txt'), 'utf8').trim(), expected + '  ' + name);
+          const entries = readZip(data).filter(entry => !entry.directory);
+          assert.equal(entries.length, 73);
+          const stage = fs.mkdtempSync(path.join(os.tmpdir(), 'hp-release-publish-'));
+          for (const entry of entries) {
+            assert.ok(entry.path.startsWith('dsh-hippocampus/'));
+            const rel = entry.path.slice('dsh-hippocampus/'.length);
+            const committed = execFileSync('git', ['show', 'HEAD:' + rel], { maxBuffer: 2 * 1024 * 1024 });
+            assert.ok(committed.equals(entry.data), 'ZIP differs from committed source: ' + rel);
+            const destination = path.join(stage, entry.path);
+            fs.mkdirSync(path.dirname(destination), { recursive: true });
+            fs.writeFileSync(destination, entry.data);
+          }
+          const report = checkRelease(path.join(stage, 'dsh-hippocampus'), { zipPath: zip });
+          assert.ok(report.ok, JSON.stringify(report));
+          console.log('Verified 73 files, source identity, CRC, release checks and SHA-256: ' + expected);
+          NODE
+      - name: Publish the verified pre-release once
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release already exists; leaving it unchanged."
+            exit 0
+          fi
+          gh release create "$TAG" \
+            "$RELEASE_DIR/dsh-hippocampus-0.2.0-preview.3.zip" \
+            "$RELEASE_DIR/SHA256SUMS.txt" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$PUBLISH_SHA" \
+            --title "DSH-Memory v0.2.0-preview.3 · 记忆活动面板公开测试版" \
+            --notes-file "$RELEASE_DIR/RELEASE-NOTES.md" \
+            --prerelease \
+            --latest=false
