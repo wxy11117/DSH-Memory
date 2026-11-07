@@ -1,0 +1,766 @@
+{
+  "version": "0.3.0-preview.5",
+  "zipSha256": "931cb55bbe71172c7208a74ed7fc60b12cc89c983579183cfbf0cff68f38ee17",
+  "files": [
+    {
+      "path": "dsh-hippocampus/.gitattributes",
+      "bytes": 271,
+      "sha256": "d66d50387884b71da841e84403a9f8c45fb7650dec7122d146e47f7f058d31da"
+    },
+    {
+      "path": "dsh-hippocampus/.github/workflows/test.yml",
+      "bytes": 1796,
+      "sha256": "fa4309457f65fcd39f4063a88ebdb6e86584b5b75c3a5e64eb12bd200212247e"
+    },
+    {
+      "path": "dsh-hippocampus/.gitignore",
+      "bytes": 279,
+      "sha256": "90dd2e11df2cdf4298386fe6abbee9787453e8500018317bc32d84c863bf3ebc"
+    },
+    {
+      "path": "dsh-hippocampus/CHANGELOG.md",
+      "bytes": 22563,
+      "sha256": "4088b1cb24e8d9962f3807988b170aa669970931bc5cffb4da360f5a540e0879"
+    },
+    {
+      "path": "dsh-hippocampus/LICENSE",
+      "bytes": 1097,
+      "sha256": "f57c0d5e6a11ca0645e1e4af8cac9b91b10457657282dac575393c7afb7fe007"
+    },
+    {
+      "path": "dsh-hippocampus/README.md",
+      "bytes": 7237,
+      "sha256": "0d60d2639959ba7fceadcc000c285616f02c20d3723ed30c41910c60495c776c"
+    },
+    {
+      "path": "dsh-hippocampus/cordis.patch.yml",
+      "bytes": 1040,
+      "sha256": "de01d64341ecb1a86ddd75e37d39abfb3b3c37b52f99cd37fe383b7a00170a52"
+    },
+    {
+      "path": "dsh-hippocampus/dashboard/app.js",
+      "bytes": 31738,
+      "sha256": "4af578baeb90b98613c3ba67c105ed7a392afff0431c7d5e5981a6eff29993a1"
+    },
+    {
+      "path": "dsh-hippocampus/dashboard/dafeiyu-mascot.webp",
+      "bytes": 215516,
+      "sha256": "4aa750ebb62b8b22eefe2839f6fe1d8d268513987bf59bf61316e718d75476e9"
+    },
+    {
+      "path": "dsh-hippocampus/dashboard/demo.js",
+      "bytes": 6082,
+      "sha256": "4b8c2710783ee705a286af427b3f8793acfcac828db7eb9e26cf37439f8fe3c3"
+    },
+    {
+      "path": "dsh-hippocampus/dashboard/favicon.svg",
+      "bytes": 325,
+      "sha256": "6991f0253fdb18a84e881eeaa624ff7c0294a85bfbc8b13b27a6244749324e36"
+    },
+    {
+      "path": "dsh-hippocampus/dashboard/index.html",
+      "bytes": 12304,
+      "sha256": "81819ae2ba4c4c1c535a3570304c02ce8a9d44574baa54bafbb0afc5bccbad6b"
+    },
+    {
+      "path": "dsh-hippocampus/dashboard/network.js",
+      "bytes": 30372,
+      "sha256": "ad17e96758d6809dd05843e3a90c1021c38dda6954be526834ad7b5d814edf61"
+    },
+    {
+      "path": "dsh-hippocampus/dashboard/styles.css",
+      "bytes": 22604,
+      "sha256": "50bc839ba4db2abdd60849e8d91d602d1d7b4fd7904f3884df5d5f008d7cc432"
+    },
+    {
+      "path": "dsh-hippocampus/dashboard/warm.css",
+      "bytes": 14565,
+      "sha256": "518f6d17fb6ab48b05b34dc1435d49c2f0066eaaad3cda9f5afff616faf16f25"
+    },
+    {
+      "path": "dsh-hippocampus/docs/ACTIVITY-DASHBOARD.md",
+      "bytes": 12714,
+      "sha256": "7033355a78833b1326ed176d340c9634e88da8a97b59b425969f1db7bf1b9468"
+    },
+    {
+      "path": "dsh-hippocampus/docs/DESIGN.md",
+      "bytes": 7886,
+      "sha256": "c6c37fa42ff68252f5c616d64afbbcd78d89225aa447682d0fabf67f5ecdcd21"
+    },
+    {
+      "path": "dsh-hippocampus/docs/FIRST-RUN.md",
+      "bytes": 6127,
+      "sha256": "e413122556ff82b887d73f9fdc0bb187360f9f04fee92f8b1058efe6378d5bac"
+    },
+    {
+      "path": "dsh-hippocampus/docs/LEGACY-PREVIEW3-README.md",
+      "bytes": 22907,
+      "sha256": "fa0ef0bfa163dcaef7c95a01f61c1a42187c7cf405857ec405a6b0c7d5c23164"
+    },
+    {
+      "path": "dsh-hippocampus/docs/LOCAL-ENDPOINTS.md",
+      "bytes": 2771,
+      "sha256": "5c841f78421ff5a93d9035c0f58b759212a0e1259b25d3fa4a8fe7b7ca2a156e"
+    },
+    {
+      "path": "dsh-hippocampus/docs/LOCAL-TRIAL.md",
+      "bytes": 6067,
+      "sha256": "204aee5fb046121a6fe12dc300515b584080f582f89c42a34d11d5c9c5e5d090"
+    },
+    {
+      "path": "dsh-hippocampus/docs/MIGRATE-SPACES.md",
+      "bytes": 5211,
+      "sha256": "c758fa5f75af571fcb28540e58a5318666a582712b6f3c2bd3157b432a8ed8a0"
+    },
+    {
+      "path": "dsh-hippocampus/docs/PREVIEW3-FIX.md",
+      "bytes": 2314,
+      "sha256": "6eea9e8ed460a1e4176dca416ecec66b2ee3586f55dd95fd545db78fc961d890"
+    },
+    {
+      "path": "dsh-hippocampus/docs/PUBLISH.md",
+      "bytes": 4161,
+      "sha256": "89f1c75fda259e8173aa4d817e9bc081ce69d0b18f3c71822fea830961b03110"
+    },
+    {
+      "path": "dsh-hippocampus/docs/ROOM-ASSETS.md",
+      "bytes": 1332,
+      "sha256": "5609074e177c57d92ddadf918767e947b108a9eb29fe7b5a3529878db8ec8730"
+    },
+    {
+      "path": "dsh-hippocampus/docs/ROOM-LIFE.md",
+      "bytes": 6153,
+      "sha256": "194e1c9b600545f38f32d9bfeee2dc69f7dd1ef2a5785662e64eafc256543032"
+    },
+    {
+      "path": "dsh-hippocampus/docs/ROOM-PREVIEW.md",
+      "bytes": 10928,
+      "sha256": "ab365c2484a88dd9442fa8815f7a34556e9bc4a93c9da4c33226fa40da07fcae"
+    },
+    {
+      "path": "dsh-hippocampus/docs/STARTUP-RECOVERY.md",
+      "bytes": 2120,
+      "sha256": "51c8dca635dfa596c03d8bd3e4762e9ffc4654e96fd37c41f717eafb1644454a"
+    },
+    {
+      "path": "dsh-hippocampus/docs/TRY-PREVIEW.md",
+      "bytes": 4097,
+      "sha256": "df61177e466363b055bbb5e86b91b3abca397c75798e273aaaed37091ec2a5ae"
+    },
+    {
+      "path": "dsh-hippocampus/examples/embed.mjs",
+      "bytes": 3254,
+      "sha256": "db0e9f41783ff16918fb979944416239c38d6384a6af3ffd45d1525e036fc7df"
+    },
+    {
+      "path": "dsh-hippocampus/lib/activity.mjs",
+      "bytes": 9495,
+      "sha256": "aa1dc19ede153506d1a4edc8171f03408d2efd7d42d0819940836e1c4941c6d3"
+    },
+    {
+      "path": "dsh-hippocampus/lib/bridge.mjs",
+      "bytes": 4024,
+      "sha256": "2cf8f2a96447578863fbde271c2c7aab25ee686ef7b4c6fb28922b890f5cfcb2"
+    },
+    {
+      "path": "dsh-hippocampus/lib/dashboard-lifecycle.mjs",
+      "bytes": 1109,
+      "sha256": "c6b54dfccefe199fd8f2857946588c1b223ea2b4ec676b9e0647408aaf9775c4"
+    },
+    {
+      "path": "dsh-hippocampus/lib/dashboard-model.mjs",
+      "bytes": 4412,
+      "sha256": "592b8ed5f700e88f0a16739288d896a9d7ef0f0e434c8899683f57e758d37ede"
+    },
+    {
+      "path": "dsh-hippocampus/lib/dashboard-server.mjs",
+      "bytes": 5943,
+      "sha256": "0bcc1481129157a11a8e53621ecb20c9e6dbef7b4a97477cce9c5a2de585cf1e"
+    },
+    {
+      "path": "dsh-hippocampus/lib/hippocampus.js",
+      "bytes": 66497,
+      "sha256": "65df69d90ee224e3da8b2e22da9768b121967d94c8f2d6f02bd7e79710a2d6be"
+    },
+    {
+      "path": "dsh-hippocampus/lib/hostdeps.mjs",
+      "bytes": 6186,
+      "sha256": "6439c60e678e57e41f929e04a6844f16b813e885af23809abf22cbadb52c5829"
+    },
+    {
+      "path": "dsh-hippocampus/lib/index.js",
+      "bytes": 44767,
+      "sha256": "1e6daa08453777264f85f5b2b7e2c1886c867019f07cdfcec086cf32143dc823"
+    },
+    {
+      "path": "dsh-hippocampus/lib/onboarding.mjs",
+      "bytes": 1113,
+      "sha256": "1229a3430f5e90d06764c942bb776b34dc4ec21d753619f0641118b862e1b2b1"
+    },
+    {
+      "path": "dsh-hippocampus/lib/room-life.mjs",
+      "bytes": 6960,
+      "sha256": "a02ef25c3ce03426ff556186c13fac4dfb05b5a5916eeda2ad474f6e2f3bddd8"
+    },
+    {
+      "path": "dsh-hippocampus/lib/room-server.mjs",
+      "bytes": 7191,
+      "sha256": "f2d4dfe8615782404624fb8277602024fb1d9494d941097c6790e7c7c87ac533"
+    },
+    {
+      "path": "dsh-hippocampus/lib/room-state.mjs",
+      "bytes": 9195,
+      "sha256": "4159397a41c9e888c4778c554f7d3cfe6ee36144e97955fe42f0c4022431ee08"
+    },
+    {
+      "path": "dsh-hippocampus/lib/spaces.mjs",
+      "bytes": 3598,
+      "sha256": "9e51438b80411d64732e9d93b5b2891289c76539f238a21c49dfbc9860ee4c5f"
+    },
+    {
+      "path": "dsh-hippocampus/lib/store.js",
+      "bytes": 5266,
+      "sha256": "a9493a58be3111d67ce6a671f5bec48009d9baee503e440c710487d5581796e2"
+    },
+    {
+      "path": "dsh-hippocampus/lib/topic.js",
+      "bytes": 1737,
+      "sha256": "0b6b9a218245e82091c477cdbdc2232dc7250e31ad6726df0950ff151b387a89"
+    },
+    {
+      "path": "dsh-hippocampus/locale/en.json",
+      "bytes": 233,
+      "sha256": "6f0fe1a8ca215f66172856d3589e0c096245e335c38b22e594bec484aebdd2a1"
+    },
+    {
+      "path": "dsh-hippocampus/locale/zh.json",
+      "bytes": 148,
+      "sha256": "56cce27ed29b84600512786940819dea152c53bd10da8f1f161ef407fac5fd76"
+    },
+    {
+      "path": "dsh-hippocampus/package.json",
+      "bytes": 2815,
+      "sha256": "7ae4cc2780388d76a36d419d53c0d4aba4b419ca0e4ed42cd3098013b0cd3f87"
+    },
+    {
+      "path": "dsh-hippocampus/room/assets/anime-coast.png",
+      "bytes": 2035202,
+      "sha256": "1244e5838198f7c59c3103209c0e8a8b3b2d60cf2456124bca00d46d073ae41e"
+    },
+    {
+      "path": "dsh-hippocampus/room/assets/coast-panorama-v4.png",
+      "bytes": 1982823,
+      "sha256": "32ee8f8786f1bc363a2f72027928381c662ac7d4ae95abd9611bc64d6ca812c9"
+    },
+    {
+      "path": "dsh-hippocampus/room/assets/dayu-actions.png",
+      "bytes": 1777646,
+      "sha256": "6aa7f4549ff272fc9e1e2354d0e49a4bb6c36a5d70e4dc0c1ec5169987c71bfd"
+    },
+    {
+      "path": "dsh-hippocampus/room/assets/dayu-walk.png",
+      "bytes": 1556939,
+      "sha256": "a0ae490657976c3f4bf28767b18aeb734f97afc4ab0ca9fe78edf94204356c86"
+    },
+    {
+      "path": "dsh-hippocampus/room/assets/dayu.png",
+      "bytes": 1398642,
+      "sha256": "dbb6965e771c57953eb519fe1a0d161ac9b6322021b57db671213fc9d211ae4c"
+    },
+    {
+      "path": "dsh-hippocampus/room/assets/favicon.svg",
+      "bytes": 425,
+      "sha256": "165c2047c834887cd479d6ff242296f93074e5c188946677ac5183819ecc7f38"
+    },
+    {
+      "path": "dsh-hippocampus/room/connection.css",
+      "bytes": 561,
+      "sha256": "bfd6beb957b96e5174b96190d55c84e7682b54f735c7f06af3150d08b8a85120"
+    },
+    {
+      "path": "dsh-hippocampus/room/data/HYG-LICENSE.txt",
+      "bytes": 422,
+      "sha256": "f404190403d31e0ce7223f4cb7af954485ad88077358330754dc5c892a856627"
+    },
+    {
+      "path": "dsh-hippocampus/room/data/README.md",
+      "bytes": 764,
+      "sha256": "77a9f3c191ed8bab777e915ace3fcee6a297f6ed04e8650cd57c46eb77cb9f53"
+    },
+    {
+      "path": "dsh-hippocampus/room/data/stars-hyg-v41.json",
+      "bytes": 931651,
+      "sha256": "4ef2a3ff562fab06c8567687aa9845fbe57b9020e87183f1d40458d642280aa2"
+    },
+    {
+      "path": "dsh-hippocampus/room/index.html",
+      "bytes": 15324,
+      "sha256": "9c53330a41840af38c133c6528055df7a9926be361f1460e6db6b6797a80b989"
+    },
+    {
+      "path": "dsh-hippocampus/room/memory-panel.css",
+      "bytes": 5730,
+      "sha256": "1102d5fdb0c6243f69a19cff513084590d1bb2f4ef631c586e18827778b011c6"
+    },
+    {
+      "path": "dsh-hippocampus/room/observatory.css",
+      "bytes": 8420,
+      "sha256": "c1d6c9becb231fad09b7cd5b4d93f1643c31632939780419d09bcbd6cece0cf4"
+    },
+    {
+      "path": "dsh-hippocampus/room/settings.css",
+      "bytes": 2851,
+      "sha256": "51914f07d0fcc943d5aeabb4a36f8457e6942fab82e93441e2102afebb318b00"
+    },
+    {
+      "path": "dsh-hippocampus/room/setup.html",
+      "bytes": 4319,
+      "sha256": "a88d5e3eed637c282223dc799adfd886fa376a375036ba173d597832114ed8d5"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/action-catalog.js",
+      "bytes": 4486,
+      "sha256": "81d6d2bdd82f006d6dcb1417ed06ce87bc50c6feeb5fad3ef15a2bd53635b25d"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/ambience.js",
+      "bytes": 2732,
+      "sha256": "2e23e3ae6f942fe55d9b104200f98278db389cc689c3e70fa0d3db5426c7068e"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/app.js",
+      "bytes": 35772,
+      "sha256": "665b535915b0f1f693467434a7def7b13979bc179f22f5d156efd90c1904bc33"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/astronomy-data.js",
+      "bytes": 4037,
+      "sha256": "d5bb3e4c09b3d368af8d119a99775252b86570f4133efe6fcf4edb93c95717b2"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/audio.js",
+      "bytes": 1345,
+      "sha256": "f19f5f214e1c869348c725438506dbf6d61ffbee1e1ed4bdabf693b027a9ace7"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/bootstrap.js",
+      "bytes": 7739,
+      "sha256": "02a641cfd25c8e00373c26dddc0c950e2283fdbb1bc8ceaa70532a8a8a4cca0e"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/celestial.js",
+      "bytes": 2052,
+      "sha256": "3be74fee0d304772cc4a9e78963ed4aabf6267de5309f9fe04ba97dd25e6b3bb"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/coast.js",
+      "bytes": 5007,
+      "sha256": "b8791596490fb6aaf7e3e313db6c89907a967aaa4708e9e06526b5d746d3ee72"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/computer.js",
+      "bytes": 16111,
+      "sha256": "15806377d820aaea826b939f6a4b76e99c2fe2d17514e5b53279eac4f8a53439"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/core.js",
+      "bytes": 5947,
+      "sha256": "9bcb73cdd54e2a9726c7572b5bbb503db244656619715636e129f613b0662c91"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/discovery.js",
+      "bytes": 3144,
+      "sha256": "67433c76e08a422cfec064d060b939bd4a7ec21f49dc9258429e96ee06fdf7e7"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/environment.js",
+      "bytes": 4805,
+      "sha256": "df48b875e2c3829ff69fb45fc66a3b2ac1cc7b23e85192b19a25ea4bb34f64f2"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/heating-data.js",
+      "bytes": 266,
+      "sha256": "b7e98e430a61c9eee939cd5e5bfdfb21074605a6f3dbe70cdd7a3ac49edfe733"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/heating.js",
+      "bytes": 3703,
+      "sha256": "2a84f388d809e876343fb03e5445ad8451abe10ea5725270210e750a1b73a144"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/house.js",
+      "bytes": 10793,
+      "sha256": "ba8f0c427e8593d39bf20a904ae17fc1f755dba480a5b8e771b82d792908c21b"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/icons.js",
+      "bytes": 4340,
+      "sha256": "78c5cb9ea55306ae999b7a6ce2c26161534df68605ade6dd879b229577d27137"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/joinery.js",
+      "bytes": 7124,
+      "sha256": "e1a07c888b7ea126f4786ba8257854bc3342339950154f8921468e243fec90a0"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/kitchen-data.js",
+      "bytes": 3089,
+      "sha256": "63c1e1c7cc50d85cec70aa5219b178c71357bc90e59e1c24586eaa26a9073533"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/kitchen-model.js",
+      "bytes": 12431,
+      "sha256": "169b113e5a63023b2e55205eae50370f6f24d7929f593aa282b10709f58b7e75"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/kitchen.js",
+      "bytes": 13829,
+      "sha256": "287e67811420ade1128de410d8ffe304d5938f7848aa9b952039f752efd8d60b"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/memory-panel.js",
+      "bytes": 6655,
+      "sha256": "3ad9443f2eb501086612820f8824d0ca36ba4c5b99b48379cf72e1e35b76c15d"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/motion.js",
+      "bytes": 2787,
+      "sha256": "56be3c640c4bc1b91f3d2927d920b0eada73fdcf10d8ce36565e194991f005ce"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/music.js",
+      "bytes": 11049,
+      "sha256": "c69c9f9c988d992c0e6d2e69fe7b42304e2bf2db09fa917470b91bb50e40f9bb"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/objects.js",
+      "bytes": 17571,
+      "sha256": "4ce42f6f976e781d8e1e3c2adf9303f1a93d072a0c68f856ffc99ebe5c2e7fab"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/persistence.js",
+      "bytes": 3025,
+      "sha256": "b8fac4a8cdcc539fb941fde9563730c448167b9411c3e8876b6f9d69825f80ba"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/room-client.js",
+      "bytes": 2850,
+      "sha256": "af474b45bab41641650eca761cd0dec91b6897fc5b5d393a7f2a819dc7622047"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/setup.js",
+      "bytes": 3631,
+      "sha256": "e3b751df8d4668c4b9b51dbb088ef5e1511a8b32b3e7f449754c034a0301afc1"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/telescope.js",
+      "bytes": 19050,
+      "sha256": "1bfbd996388a222733b508cecc74058de402b4a143dccb37903cbef666d4f89c"
+    },
+    {
+      "path": "dsh-hippocampus/room/src/world.js",
+      "bytes": 27971,
+      "sha256": "36702ec47a8511b15816f34f69bb5a579b42a382eaf1d974d19259082718893a"
+    },
+    {
+      "path": "dsh-hippocampus/room/style.css",
+      "bytes": 38997,
+      "sha256": "a9b002eb6420a300b0f1368ce94f27a055c28272a3d249acd2ba2dffe30204f4"
+    },
+    {
+      "path": "dsh-hippocampus/room/vendor/ASTRONOMY-LICENSE.txt",
+      "bytes": 1095,
+      "sha256": "a76df666a7db8a06f599d08e07c3ff74c4b250b50b49c43353af2bd5bb34604e"
+    },
+    {
+      "path": "dsh-hippocampus/room/vendor/LICENSE",
+      "bytes": 1081,
+      "sha256": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601"
+    },
+    {
+      "path": "dsh-hippocampus/room/vendor/OrbitControls.js",
+      "bytes": 38703,
+      "sha256": "b97879c748170baadeb3fb84cea1ffdf4674e283dc06042f34e2acb95a76042c"
+    },
+    {
+      "path": "dsh-hippocampus/room/vendor/RoundedBoxGeometry.js",
+      "bytes": 6476,
+      "sha256": "c1b7c9bd2cddff2e3f3a0723f618a3d364a47450e3d25771d21faed88410bec8"
+    },
+    {
+      "path": "dsh-hippocampus/room/vendor/astronomy.js",
+      "bytes": 412179,
+      "sha256": "0276ebbcfc3746cad98417e3082ba510067ae81a92c1f6ad0f43fae8d417fdc7"
+    },
+    {
+      "path": "dsh-hippocampus/room/vendor/three.core.js",
+      "bytes": 1403455,
+      "sha256": "eb077d2417f61d3e6d9264c317cabc4ea35769ed6b0ab533067292a550784c20"
+    },
+    {
+      "path": "dsh-hippocampus/room/vendor/three.module.js",
+      "bytes": 603113,
+      "sha256": "c8211c69345d2e9949dc7a8ac969380497aa0600a5a8ac6a459c8cd02dd9cb8a"
+    },
+    {
+      "path": "dsh-hippocampus/tests/activity-dashboard.test.mjs",
+      "bytes": 15874,
+      "sha256": "94ea5cc69cd545fa1ce38d2987ae4c4a262a0814a3c7c86589e11d53f13ea38e"
+    },
+    {
+      "path": "dsh-hippocampus/tests/cli-persist.test.mjs",
+      "bytes": 2519,
+      "sha256": "97647cbe778719e87a8ef10308cfe6665c5779f791219f3f32f20322f2f2219c"
+    },
+    {
+      "path": "dsh-hippocampus/tests/dashboard-lifecycle.test.mjs",
+      "bytes": 2487,
+      "sha256": "6f90e268bfb9e262376551f37ed5ab2d57f367efd866770661dcfe967c03a36f"
+    },
+    {
+      "path": "dsh-hippocampus/tests/engine.test.mjs",
+      "bytes": 7708,
+      "sha256": "516a77a968b3dd6adc578a8969185bc98d05e96bb8f7467d769ca0d21513d735"
+    },
+    {
+      "path": "dsh-hippocampus/tests/fixture-safety.test.mjs",
+      "bytes": 1638,
+      "sha256": "5e35a5f9a210bef94810474d12e288088d7b2e2912f16259f588f78776c069d6"
+    },
+    {
+      "path": "dsh-hippocampus/tests/helpers/package-fixture.mjs",
+      "bytes": 1939,
+      "sha256": "c6f9d0b79de38ed526c4ce161126dac58558f7df50f96070adc5561d159ceaba"
+    },
+    {
+      "path": "dsh-hippocampus/tests/helpers/room-host.mjs",
+      "bytes": 1505,
+      "sha256": "5d0502fcf9d130d79d8a0871f1078960f723a3b8fb8ba1c3b5f23b9bd2d159e7"
+    },
+    {
+      "path": "dsh-hippocampus/tests/inject-lifecycle.test.mjs",
+      "bytes": 2817,
+      "sha256": "0cd616642a7328751fc78fd8e016dbaeb68438fcde1083be285595a4b6a90e03"
+    },
+    {
+      "path": "dsh-hippocampus/tests/install-flow.test.mjs",
+      "bytes": 13591,
+      "sha256": "812c7ec86f31217b04ca219a12c7465586617389e90ffc90c1ee8a57be837881"
+    },
+    {
+      "path": "dsh-hippocampus/tests/install-wrapper.test.mjs",
+      "bytes": 8698,
+      "sha256": "32a6945bb840a5e093ec09c42f548d016b6be08a6d13c0da81118cd62989554f"
+    },
+    {
+      "path": "dsh-hippocampus/tests/install.test.mjs",
+      "bytes": 5690,
+      "sha256": "42ece5e455ccedb6c094d8dda0e3658fa60f890bf5f182cb0d08d583370d4cf4"
+    },
+    {
+      "path": "dsh-hippocampus/tests/loader.test.mjs",
+      "bytes": 7302,
+      "sha256": "ce0278ce070d50aa559f955df906119609bfcade9cfea4469e21b0df9d706f8a"
+    },
+    {
+      "path": "dsh-hippocampus/tests/migration.test.mjs",
+      "bytes": 9788,
+      "sha256": "b323e4f47ec23fcb0d5718d2258df2d5cadec1d9cb122d8a71a5856210c12e16"
+    },
+    {
+      "path": "dsh-hippocampus/tests/network-layout.test.mjs",
+      "bytes": 8041,
+      "sha256": "7e5c59644c6f3408457b8a820b4ffd7615a92b5375ba7425da5375299dfbdc07"
+    },
+    {
+      "path": "dsh-hippocampus/tests/onboarding.test.mjs",
+      "bytes": 2974,
+      "sha256": "d1acafff51c4b7f4276e93afabebdfa17431cfcaed7d70df825154d3c195ed72"
+    },
+    {
+      "path": "dsh-hippocampus/tests/plugin-link.test.mjs",
+      "bytes": 3134,
+      "sha256": "b0194272e8cc3929d9bb60f9f0ac4758dcf7721f74a6fbc4d2cf3bdbf9f0dde7"
+    },
+    {
+      "path": "dsh-hippocampus/tests/real-boot.mjs",
+      "bytes": 6650,
+      "sha256": "d6d5bdc1930ee90724ce1668bdd75a6e59625a9d8272ac7c1a90844d4830908d"
+    },
+    {
+      "path": "dsh-hippocampus/tests/real-cordis.mjs",
+      "bytes": 7278,
+      "sha256": "17d9aa4cd4b6ff1e2624020f8bca8b2ec9921e04c8a27553b4325ed302a32978"
+    },
+    {
+      "path": "dsh-hippocampus/tests/real-host.mjs",
+      "bytes": 8755,
+      "sha256": "77f5423d76a454e0aefbb39dc1fa8de0ddea8b1eda7cefaf23ca1f9f9876306f"
+    },
+    {
+      "path": "dsh-hippocampus/tests/real-loader.mjs",
+      "bytes": 6692,
+      "sha256": "599ef1e0e001c403c570d2c4b9f291ef4388f28a9247114f825b9425689d7e1a"
+    },
+    {
+      "path": "dsh-hippocampus/tests/real-room.mjs",
+      "bytes": 6449,
+      "sha256": "5cae9536087987476444be565726b3d539c057df97b50b4c288b01f647410c5c"
+    },
+    {
+      "path": "dsh-hippocampus/tests/regression.test.mjs",
+      "bytes": 6840,
+      "sha256": "f31faddb938b233625a96f3c5fd42aa9feff92c3bab627264ff5411d9ae88ae9"
+    },
+    {
+      "path": "dsh-hippocampus/tests/release.test.mjs",
+      "bytes": 6770,
+      "sha256": "b4a16e61d064a89e21af556ae3ea4836ca663d7bf964c8cc1edfcedfca1fdb52"
+    },
+    {
+      "path": "dsh-hippocampus/tests/room-life.test.mjs",
+      "bytes": 10665,
+      "sha256": "8086b1a628d98ccb9b10c03972463b9cdd597e7d4f1a271a2117caae64d57a18"
+    },
+    {
+      "path": "dsh-hippocampus/tests/room-motion.test.mjs",
+      "bytes": 973,
+      "sha256": "ddbb9868505fce27e427e30487393828a2cf4b843497a8d139f8bcf1cbc8adff"
+    },
+    {
+      "path": "dsh-hippocampus/tests/room-preview.test.mjs",
+      "bytes": 1192,
+      "sha256": "977099ba00d94ef0db270105f1dc9ecf6d1ab80c6af31e4de5477b0c8e6e81aa"
+    },
+    {
+      "path": "dsh-hippocampus/tests/smoke-bridge.mjs",
+      "bytes": 3553,
+      "sha256": "ee617792507d45f90172aa02e977b506f43ea292ba006fab1fe9fde0da837fc5"
+    },
+    {
+      "path": "dsh-hippocampus/tests/smoke-host.mjs",
+      "bytes": 5073,
+      "sha256": "971b3ac8d6c756061c2197c596f3da48cb2d136e52ca64b2377111e8321b0ef2"
+    },
+    {
+      "path": "dsh-hippocampus/tests/smoke-noprompt.mjs",
+      "bytes": 4306,
+      "sha256": "e40d9efd71f512ebdde06a207856dd82850e7f54febe7c45e63bfa706054a924"
+    },
+    {
+      "path": "dsh-hippocampus/tests/space-room.test.mjs",
+      "bytes": 11814,
+      "sha256": "ee78af49cc892ef6229ee10cfd098a962060081506f5d4da31822034ef5600f2"
+    },
+    {
+      "path": "dsh-hippocampus/tests/tool-layer.test.mjs",
+      "bytes": 6135,
+      "sha256": "d23c1bc4520a498e1a4e8a62db38647636622d5a6c1fff5bfa54f2d99ae4ad1f"
+    },
+    {
+      "path": "dsh-hippocampus/tests/wrapper.test.mjs",
+      "bytes": 4192,
+      "sha256": "45351a3b5a96abbe7d9c637e85c590c8ae5fc70ca814a819ae1b1d7d0449a931"
+    },
+    {
+      "path": "dsh-hippocampus/tools/asar-deps.mjs",
+      "bytes": 4447,
+      "sha256": "7837dd104621b6026a9950ae2c8f0fd0728fee1eb0b57a49f673afaab157047c"
+    },
+    {
+      "path": "dsh-hippocampus/tools/check-install.mjs",
+      "bytes": 13125,
+      "sha256": "db450e21f1582f4a8212fbeb298b6cc21d6931333c74c73f462d49fd33f378a7"
+    },
+    {
+      "path": "dsh-hippocampus/tools/dashboard.mjs",
+      "bytes": 2344,
+      "sha256": "e22bc1a8aad73dae7b8ad9228f727503133d67f1bf4c32b684f6112acae35209"
+    },
+    {
+      "path": "dsh-hippocampus/tools/hp.mjs",
+      "bytes": 6920,
+      "sha256": "fec17a5978fcf01438ed7dfc0710872eec0512e3a7a3fa675ecbccab3b95e331"
+    },
+    {
+      "path": "dsh-hippocampus/tools/install-preflight.mjs",
+      "bytes": 2540,
+      "sha256": "b39fe2a7761d946c9fdbde7efbf92d06e20f3354e877e25c245d7a7bee26bfb7"
+    },
+    {
+      "path": "dsh-hippocampus/tools/install.cmd",
+      "bytes": 691,
+      "sha256": "8ee055166d13f8dee05ba73bfc18294c86c253e87f7adcb159de2ba99c65c11b"
+    },
+    {
+      "path": "dsh-hippocampus/tools/install.mjs",
+      "bytes": 16282,
+      "sha256": "df3decea5c4d6bb789ac651fde5f37f6bd1fa5e748581c510afd21a8093d7f09"
+    },
+    {
+      "path": "dsh-hippocampus/tools/install.ps1",
+      "bytes": 10226,
+      "sha256": "bf90b0fc1be36b78fa060dc66776fdc877cc63bb8b3937a27d6f8294328e710d"
+    },
+    {
+      "path": "dsh-hippocampus/tools/local-check.cmd",
+      "bytes": 112,
+      "sha256": "778bc75dd7915e99c1f57845c9472cd0fdd312b83287c8a45e3b4bf6b534c28a"
+    },
+    {
+      "path": "dsh-hippocampus/tools/local-check.mjs",
+      "bytes": 3897,
+      "sha256": "403ac5d8a9989790d2b4d01c2521a98991adb51e83790426d1c075c866d460ab"
+    },
+    {
+      "path": "dsh-hippocampus/tools/memory-migration.mjs",
+      "bytes": 7000,
+      "sha256": "f3d236d1e2580ea83702eb50ebb7b5860cf7b1104635199f53594536699b1853"
+    },
+    {
+      "path": "dsh-hippocampus/tools/migrate.mjs",
+      "bytes": 4034,
+      "sha256": "7e83d11eff51749764ae1f30cf21c2ef1d1f654404f6f57ecacbf4640aaf6f73"
+    },
+    {
+      "path": "dsh-hippocampus/tools/pack.mjs",
+      "bytes": 2009,
+      "sha256": "a8a7deebe51ae2f9608c4c01d2ccdf4d63975248b6e7e5478e7f36555bcfcbba"
+    },
+    {
+      "path": "dsh-hippocampus/tools/patch-parse.mjs",
+      "bytes": 8349,
+      "sha256": "cc958452509a51dd5d67772c840477cd29a735a0850127d3653c50852a3717c6"
+    },
+    {
+      "path": "dsh-hippocampus/tools/plugin-link.mjs",
+      "bytes": 2447,
+      "sha256": "1af39037f93f41ce0b404ab5031e0d1f59dc5290fe79bdcaef959a59b8602d60"
+    },
+    {
+      "path": "dsh-hippocampus/tools/preview-room.cmd",
+      "bytes": 113,
+      "sha256": "c1463eceb72e927cb1584b88e3347f14aa0513189631ef1450ec8edf836d6fa2"
+    },
+    {
+      "path": "dsh-hippocampus/tools/preview-room.mjs",
+      "bytes": 2232,
+      "sha256": "a329d66027695ea64a1c18ec1834ea97382cf8322b3f403c894ad3e5c69765e3"
+    },
+    {
+      "path": "dsh-hippocampus/tools/release-check.mjs",
+      "bytes": 5297,
+      "sha256": "177638e4f95b0dd12906d16fae72a0b2ce142bb6852c877033699eeb7ae8bfcd"
+    },
+    {
+      "path": "dsh-hippocampus/tools/release-files.mjs",
+      "bytes": 3412,
+      "sha256": "74f08c58901af0bd472d1969b237b90e66b29dd1258fefacb0d2bcb9a4db7625"
+    },
+    {
+      "path": "dsh-hippocampus/tools/zip.mjs",
+      "bytes": 6905,
+      "sha256": "650cd7e8fdc9b4c38c4e6b42d7e54688adfb3fa71bb394ca6472db9a6e59533b"
+    }
+  ]
+}

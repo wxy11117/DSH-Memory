@@ -8,6 +8,7 @@ const PLACEHOLDER_URL = /github\.com\/(?:YOUR_GITHUB_USER|<your-name>|%3cyour-na
 export function forbiddenPath(name) {
   if (/(^|\/)(?:node_modules|\.git|\.hp-example)(?:\/|$)/i.test(name)) return '依赖、版本库或本地示例数据目录'
   if (/(^|\/)(?:.*\.)?brain\.json(?:\.|$)/i.test(name)) return '运行生成的记忆库'
+  if (/(^|\/)(?:rooms|spaces)\.json$|room-preview\.lock$|(^|\/)activity\//i.test(name)) return '运行生成的房间或身份数据'
   if (/(^|\/)\.env(?:\.|$)/i.test(name)) return '环境变量文件'
   if (/\.(?:zip|log|tmp)$/i.test(name)) return '压缩包、日志或临时文件'
   return ''
@@ -55,7 +56,9 @@ export function inspectFiles(files) {
   for (const [name, data] of files) {
     const reason = forbiddenPath(name)
     if (reason) problems.push(`${name}：${reason}`)
-    if (data.length > 1024 * 1024) problems.push(`${name}：单文件超过 1 MiB`)
+    const bundledAsset=/^room\/(?:assets\/[^/]+\.(?:png|jpg|webp)|vendor\/three\.core\.js)$/.test(name)
+    const maxBytes=(bundledAsset?4:1)*1024*1024
+    if (data.length > maxBytes) problems.push(`${name}：单文件超过 ${maxBytes/1024/1024} MiB`)
     problems.push(...textProblems(name, data))
   }
   return problems

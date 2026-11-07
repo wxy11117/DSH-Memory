@@ -16,6 +16,19 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..');
 
 describe('parsePatchYaml', () => {
+  test('official empty profile template accepts comments, CRLF, BOM and flow whitespace', () => {
+    for (const text of ['[]', '# DSH profile patches\r\n[]\r\n', '\uFEFF# template\r\n [ ] # empty\r\n', '# only comments']) {
+      assert.deepEqual(parsePatchYaml(text, { requireComplete: true }), []);
+    }
+    assert.deepEqual(parsePatchYaml('- insert:\n    []\n', { requireComplete: true }), [{ insert: [] }]);
+  });
+
+  test('empty template must not hide a second document or subsequent overrides', () => {
+    for (const text of ['[]\n- id: hippocampus\n  disabled: true', '[]\n---\n[]', '[\n]', '{}']) {
+      assert.throws(() => parsePatchYaml(text, { requireComplete: true }));
+    }
+  });
+
   test('本插件真实的 cordis.patch.yml → 一条 insert，含 id/name/config', () => {
     const rows = parsePatchYaml(fs.readFileSync(path.join(ROOT, 'cordis.patch.yml'), 'utf8'));
     assert.equal(rows.length, 1);

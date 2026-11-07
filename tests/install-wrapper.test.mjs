@@ -84,6 +84,20 @@ test('Windows wrapper runs a real ESM probe and -CheckNode does not install', { 
   assert.equal(fs.existsSync(f.env.HP_WRAPPER_RESULT), false);
 });
 
+test('Windows preview launcher runs only the standalone demo and never the installer', { skip: !windows }, t => {
+  const f=fixture(t);workingShim(f.shim);f.env.DSH_HIPPOCAMPUS_NODE=process.versions.electron?f.shim:process.execPath;
+  fs.writeFileSync(path.join(f.tools,'preview-room.mjs'),`import fs from 'node:fs';fs.writeFileSync(process.env.HP_WRAPPER_RESULT,JSON.stringify({mode:'preview',args:process.argv.slice(2)}));`);
+  const result=run(f,['-PreviewRoom']);assert.equal(result.code,0,result.out);assert.deepEqual(f.result(),{mode:'preview',args:['--open']});
+  assert.deepEqual(fs.readdirSync(f.env.DSH_HOME),[]);
+});
+
+test('Windows local check launcher selects isolated verification, not installation', {skip:!windows},t=>{
+  const f=fixture(t);workingShim(f.shim);f.env.DSH_HIPPOCAMPUS_NODE=process.versions.electron?f.shim:process.execPath;
+  fs.writeFileSync(path.join(f.tools,'local-check.mjs'),`import fs from 'node:fs';fs.writeFileSync(process.env.HP_WRAPPER_RESULT,JSON.stringify({mode:'check',args:process.argv.slice(2),rawAsar:process.env.ELECTRON_NO_ASAR}));`);
+  const result=run(f,['-LocalCheck']);assert.equal(result.code,0,result.out);assert.deepEqual(f.result(),{mode:'check',args:[],rawAsar:'1'});
+  assert.deepEqual(fs.readdirSync(f.env.DSH_HOME),[]);
+});
+
 test('Windows wrapper rejects Node 20 and falls back to DSH node.cmd', { skip: !windows }, (t) => {
   const f = fixture(t);
   f.env.DSH_HIPPOCAMPUS_NODE = path.join(f.base, 'old node.cmd');

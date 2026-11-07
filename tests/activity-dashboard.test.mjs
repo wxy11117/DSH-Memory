@@ -143,9 +143,9 @@ test('plugin starts the panel before any tool request; repeated URLs reuse it an
     on(){return()=>{}},
     inject(deps,fn){fn({systemPrompt:{section(s){sections.push(s)}}})},
   }
-  apply(ctx,{homeDir:dir,verbose:false})
+  apply(ctx,{homeDir:dir,verbose:false,scopeMode:'shared',roomEnabled:false})
   t.after(()=>Promise.all(effects.map(fn=>fn?.())))
-  assert.equal(tools.size,16)
+  assert.equal(tools.size,22)
   const server=await ready,origin=`http://127.0.0.1:${server.address().port}`
   assert.equal((await fetch(origin+'/')).status,200,'panel must be serving before hp_dashboard is called')
   const item=await tools.get('hp_remember').execute({text:'活动面板端到端测试的记忆',category:'study'})
@@ -174,11 +174,11 @@ test('automatic panel startup failure leaves memory tools usable and address loo
     return originalListen.apply(this,args)
   })
   const ctx={tools:{register:tool=>tools.set(tool.name,tool)},effect(fn){effects.push(fn())},on(){return()=>{}}}
-  assert.doesNotThrow(()=>apply(ctx,{homeDir:dir,verbose:false,injectMode:'tool'}))
+  assert.doesNotThrow(()=>apply(ctx,{homeDir:dir,verbose:false,scopeMode:'shared',roomEnabled:false,injectMode:'tool'}))
   t.after(()=>Promise.all(effects.map(fn=>fn?.())))
   await failed
   await new Promise(resolve=>setImmediate(resolve))
-  assert.equal(tools.size,16)
+  assert.equal(tools.size,22)
   const item=await tools.get('hp_remember').execute({text:'面板启动失败仍能记住的合成记录',category:'study'})
   assert.equal(item.ok,true)
   const result=await tools.get('hp_dashboard').execute({})
@@ -191,7 +191,7 @@ test('automatic panel startup failure leaves memory tools usable and address loo
 test('a disabled plugin never starts the panel service', async t => {
   let starts=0
   t.mock.method(http.Server.prototype,'listen',()=>{starts++;throw new Error('disabled plugin must not listen')})
-  apply({}, {enabled:false,homeDir:temporary(),verbose:false})
+  apply({}, {enabled:false,homeDir:temporary(),verbose:false,scopeMode:'shared',roomEnabled:false})
   await new Promise(resolve=>setImmediate(resolve))
   assert.equal(starts,0)
 })
@@ -199,7 +199,7 @@ test('a disabled plugin never starts the panel service', async t => {
 test('the auto-started panel respects disabled activity recording', async t => {
   const dir=temporary(),tools=new Map(),effects=[]
   const ctx={tools:{register:tool=>tools.set(tool.name,tool)},effect(fn){effects.push(fn())},on(){return()=>{}}}
-  apply(ctx,{homeDir:dir,verbose:false,injectMode:'tool',activityLog:false})
+  apply(ctx,{homeDir:dir,verbose:false,scopeMode:'shared',roomEnabled:false,injectMode:'tool',activityLog:false})
   t.after(()=>Promise.all(effects.map(fn=>fn?.())))
   const item=await tools.get('hp_remember').execute({text:'不记录活动的合成记忆',category:'study'})
   assert.equal(item.ok,true)

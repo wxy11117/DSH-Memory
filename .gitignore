@@ -15,3 +15,8 @@ tests/**/_*.mjs
 # Local activity data
 activity/
 *.jsonl
+rooms.json
+spaces.json
+room-preview.lock
+exports/
+backups/

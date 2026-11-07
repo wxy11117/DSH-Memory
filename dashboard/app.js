@@ -17,6 +17,12 @@
   $('#dayInput').value=day;$('#dayInput').max=localDay()
   const emptySnapshot=()=>({total:0,archived:0,semantic:0,pinned:0,sealed:0,tiers:{instant:0,short:0,long:0,permanent:0},avgRetention:0,words:0,edges:0,memories:[],graph:{nodes:[],edges:[]}})
   function notify(text){$('#toast').textContent=text;$('#toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').hidden=true,3200)}
+  $('#enterRoomButton').onclick=async()=>{
+    if(mode!=='live'||!data?.roomAvailable)return;
+    const button=$('#enterRoomButton');button.disabled=true;
+    try{const response=await fetch('/api/room-entry',{headers:{'X-Memory-Access':access},cache:'no-store'});const result=await response.json();if(!response.ok)throw new Error(result.error||'小屋未连接');location.assign(result.url)}
+    catch(e){notify(e.message);button.disabled=false}
+  };
   function setNotice(text,kind=''){const box=$('#notice');box.className='notice'+(kind?' '+kind:'');box.querySelector('span').textContent=text;$('#reconnectButton').hidden=mode==='live'||!access}
   function currentMemory(id){return data?.snapshot.memories.find(m=>m.id===id)}
   function eventLabel(e){if(e.origin==='observation'){if(e.type==='recalled')return '观察到回忆时间更新';if(e.type==='reinforced')return '观察到稳定性增强';if(e.type==='suppressed')return '观察到稳定性下降';if(e.type==='archived')return '观察到移入归档';if(e.type==='restored')return '观察到恢复活跃'}return labels[e.type]||e.label||'记忆活动'}
@@ -52,6 +58,7 @@
   function render(){
     if(!data)return
     const s=data.snapshot,c=data.counts||{},isDemo=data.mode==='demo',isImport=data.mode==='import',off=data.mode==='disconnected'
+    $('#enterRoomButton').disabled=mode!=='live'||!data.roomAvailable||isDemo||isImport||off
     const connection=$('#connection');connection.replaceChildren(node('i'),document.createTextNode(isDemo?'演示模式':isImport?'本地文件快照':off?'尚未连接':data.mode==='observation'?'本机 · 文件观察':'本机 · 操作日志'));connection.className='connection'+(off?' offline':'')
     if(isDemo)setNotice('演示模式：全部记忆、数字与活动均为合成示例，不是你的真实运行记录。','demo')
     else if(isImport)setNotice('本地文件快照：只在浏览器内读取，不会上传。当前状态不能还原过去每天的活动。')

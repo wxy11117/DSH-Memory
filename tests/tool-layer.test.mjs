@@ -32,7 +32,7 @@ const ctx = {
 
 const quiet = console.log
 console.log = () => {}
-mod.apply(ctx, { injectMode: 'auto', space: 'layer', verbose: false })
+mod.apply(ctx, { injectMode: 'auto', space: 'layer', verbose: false, scopeMode: 'shared', roomEnabled: false })
 console.log = quiet
 
 const byName = new Map(tools.map((t) => [t.name, t]))
@@ -44,8 +44,8 @@ const call = async (name, args = {}) => {
 
 let rememberedId = ''
 
-test('16 个工具都在（少一个说明注册失败）', () => {
-  assert.equal(tools.length, 16, `实际 ${tools.length} 个：${tools.map((t) => t.name).join(', ')}`)
+test('22 个工具都在（少一个说明注册失败）', () => {
+  assert.equal(tools.length, 22, `实际 ${tools.length} 个：${tools.map((t) => t.name).join(', ')}`)
 })
 
 test('hp_remember 真能写进去，并返回 id / 层 / 分类', async () => {

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>先给大肥鱼选一个记忆空间</title>
+<style>
+*{box-sizing:border-box}body{font:16px/1.8 system-ui;background:#f8f2e9;color:#4e625f;margin:0;padding:24px}main{max-width:700px;margin:3vh auto;background:#fffdfa;border:1px solid #eadcc8;border-radius:28px;padding:36px;box-shadow:0 12px 44px #b29a7520}h1{font-size:28px;line-height:1.4;color:#785d46;margin:12px 0}p{margin:12px 0}.eyebrow{font-size:12px;letter-spacing:2px;color:#ab7957}.intro{color:#816c59}.rules{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0}.rule{border-radius:16px;padding:16px;background:#f9eddc;border:1px solid #ecd8bc}.rule:nth-child(2){background:#edf3ed;border-color:#dbe6d9}.rule strong{display:block;color:#6c624e}.rule p{font-size:14px;margin:6px 0 0}.identity{font-size:13px;color:#839087}code{overflow-wrap:anywhere}.current{color:#996b48;font-size:14px}label{display:block;margin:18px 0 8px}input,select,button{font:inherit;padding:11px 14px;border:1px solid #d7dfd4;border-radius:12px;width:100%;background:#fbfcf8;color:#4e625f}input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid #c6976480;outline-offset:3px}button{cursor:pointer}button:disabled{cursor:wait;opacity:.55}.choices{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.choice{width:auto;background:#fff7ea;border-color:#e7cfab;font-size:14px;padding:8px 14px}.choice[aria-pressed=true]{background:#f1d5b3;border-color:#b98958}.choice small{display:block;font-size:11px;color:#947a5e}.help{min-height:26px;font-size:13px;color:#947356}.confirmation{display:flex;gap:10px;align-items:flex-start;padding:14px;background:#f6f5ed;border-radius:12px;font-size:14px}.confirmation input{width:18px;height:18px;flex:none;margin-top:4px;accent-color:#718d79}#bind{background:#718d79;border-color:#718d79;color:white;font-weight:600;margin-top:12px}#status{font-size:14px;color:#956041;min-height:25px}footer{font-size:13px;color:#889181;border-top:1px solid #eee5d8;padding-top:16px}fieldset{border:0;padding:0;margin:0;min-width:0}a{color:#477e83}@media(max-width:520px){body{padding:12px}main{padding:22px;margin:0 auto}h1{font-size:25px}.rules{grid-template-columns:1fr;gap:8px}.rule{padding:12px 16px}}
+</style>
+</head>
+<body>
+<main>
+<div class="eyebrow">DSH MEMORY · 欢迎入住</div>
+<h1>先分清是哪只鱼，<br>再把回忆放进它的家。</h1>
+<p class="intro">不同的大肥鱼，需要不同的记忆空间。请为<strong>当前这段会话</strong>选择归属，确认后才开始读取和保存记忆。</p>
+<div class="rules">
+<div class="rule"><strong>另一只鱼 · 选不同空间</strong><p>比如鱼 A 用记忆空间1，鱼 B 用记忆空间2，各自保留记忆、便签和小屋。</p></div>
+<div class="rule"><strong>同一只鱼 · 选回原空间</strong><p>只是开了新会话？选择它原来的空间，接着使用已有回忆。只有一只鱼也需要选一次。</p></div>
+</div>
+<p class="identity">当前会话：<code id="session">正在读取…</code></p>
+<p id="current" class="current"></p>
+<form id="setup-form">
+<fieldset id="fields" disabled>
+<label for="existing">这只鱼已经有记忆空间了吗？</label>
+<select id="existing"><option value="">第一次入住，创建一个新空间</option></select>
+<label for="space">为当前这只鱼选择空间</label>
+<input id="space" maxlength="40" required autocomplete="off" placeholder="例如：记忆空间1" aria-describedby="choice-help">
+<div id="choices" class="choices" aria-label="常用空间"></div>
+<p id="choice-help" class="help">点击空间，或填写一个名字；不会自动替你选择。</p>
+<label class="confirmation"><input type="checkbox" id="agree" required><span id="agreement">我确认：当前会话属于这只鱼，可以使用所选空间的记忆和小屋。</span></label>
+<button id="bind" type="submit">确认归属，进入小屋</button>
+</fieldset>
+</form>
+<p id="status" role="status" aria-live="polite"></p>
+<footer>先确定归属，再导入旧记忆。这里不会自动读取聊天记录，也不会搬动或合并其他空间的记忆。</footer>
+</main>
+<script type="module" src="/room/src/setup.js"></script>
+</body>
+</html>

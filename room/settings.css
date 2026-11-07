@@ -1,0 +1,20 @@
+#app[hidden],.room-connection[hidden],.room-closed[hidden]{display:none!important}
+.room-options{position:fixed;right:24px;top:95px;z-index:35;display:flex;gap:8px}
+.room-options button,.room-closed button,#room-settings button{font:inherit;border:1px solid #d9d7c9;background:#fffaf0;color:#587a82;border-radius:14px;padding:10px 17px;cursor:pointer}
+.room-options button{font-size:11px;box-shadow:0 4px 16px #405a6510}
+.room-closed{height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:30px;background:radial-gradient(ellipse at 30% 25%,#fff1d8,transparent 65%),#ecf3ef;color:#4e717c}
+.room-closed h1{font-size:clamp(24px,4vw,40px);margin:0}.room-closed>span{font-size:11px;letter-spacing:3px}.room-closed p{line-height:1.9;color:#78938f}
+#room-settings{width:min(620px,calc(100vw - 32px));max-height:calc(100dvh - 42px);overflow:auto;padding:30px;border:1px solid #ddd9c8;border-radius:24px;background:#fffcf5;color:#4d6e76;box-shadow:0 24px 100px #253d5450;font:14px/1.6 system-ui;box-sizing:border-box}
+#room-settings::backdrop{background:#273d4a5c;backdrop-filter:blur(5px)}
+#room-settings h2{margin:5px 0;font-size:25px}#room-settings .room-settings-close{float:right;padding:2px 10px;font-size:24px;border:0;background:none}
+.room-settings-eyebrow{font-size:9px;letter-spacing:2px;color:#bc956f}
+.room-setting-row{display:flex;gap:18px;align-items:center;justify-content:space-between;padding:16px 0;border-top:1px solid #ece7d9}.room-setting-row small{display:block;font-size:12px;color:#81938c;margin-top:4px}
+#room-settings input[type=checkbox]{accent-color:#638c91;width:20px;height:20px;flex-shrink:0}
+.room-settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.room-settings-grid label{font-size:12px}
+.room-settings-grid input{display:block;width:100%;box-sizing:border-box;border:1px solid #ddd9c8;background:#fffdf8;border-radius:12px;padding:12px;margin-top:6px;font:inherit;color:inherit}
+.room-settings-note{font-size:12px;line-height:1.8;color:#89988f}.room-cost-confirm{display:flex;gap:10px;padding:13px;background:#f9efd9;border-radius:14px;font-size:12px;color:#8b775c}
+.room-settings-actions{display:flex;gap:10px;margin:16px 0;flex-wrap:wrap}#room-settings #room-life-save{background:#648b91;border-color:#648b91;color:white}
+.room-life-summary{background:#ebf1e9;border-radius:12px;padding:12px;font-size:12px}#room-settings-status{color:#a96948;font-size:13px}
+#room-settings details{font-size:12px;border-top:1px solid #ece7d9;padding-top:14px}#room-settings summary{cursor:pointer}
+@media(min-width:901px){#control-panel{top:148px}}
+@media(max-width:600px){.room-options{top:130px;bottom:auto;right:16px}.room-options button{font-size:10px;padding:7px 12px}.scene-heading{top:174px}.house-views{top:240px}#room-settings{padding:22px}}

@@ -1,10 +1,10 @@
 /**
- * tests/_host-stub.mjs —— 用假宿主把插件入口跑一遍（不需要真的 DSH）
+ * tests/smoke-host.mjs —— 用假宿主把插件入口跑一遍（不需要真的 DSH）
  * ============================================================================
  * 验证三件事：
- *   1. lib/index.js 能加载、14 个工具都注册成功（参数 DSL 合法）
+ *   1. lib/index.js 能加载、22 个工具都注册成功（参数 DSL 合法）
  *   2. auto 模式下 ctx.systemPrompt.section() 确实被调用，且能渲染出记忆
- *   3. 卸载时 disposer / 定时器都能收干净
+ *   3. 生命周期清理由 real-cordis 单独覆盖
  * ============================================================================
  */
 import fs from 'node:fs'
@@ -17,7 +17,8 @@ process.env.DSH_HOME = home
 // 先往库里塞两条，让注入有东西可渲染
 const hp = await import('../lib/hippocampus.js')
 const { createStore } = await import('../lib/store.js')
-const seedStore = createStore({ dir: path.join(home, 'hippocampus') })
+const seedDir = path.join(home, 'fixture-memory')
+const seedStore = createStore({ dir: seedDir })
 seedStore.load()
 const seedState = seedStore.stateFor('default')
 hp.remember(seedState, { text: '答应过主人周末陪他去看那场电影，说话算话', category: 'promise' })
@@ -25,8 +26,9 @@ hp.remember(seedState, { text: '第一次和她一起看电影，特别难忘', 
 hp.remember(seedState, { text: '她说她对芒果过敏，别再买芒果了', category: 'person' })
 seedStore.touch()   // 先标记脏，否则 flush() 什么都不写
 seedStore.flush()
-if (!fs.existsSync(path.join(home, 'hippocampus', 'brain.json'))) {
-  console.log('✗ 种子没落盘：' + path.join(home, 'hippocampus', 'brain.json'))
+seedStore.close()
+if (!fs.existsSync(path.join(seedDir, 'brain.json'))) {
+  console.log('✗ 种子没落盘：' + path.join(seedDir, 'brain.json'))
   process.exit(1)
 }
 
@@ -49,13 +51,13 @@ const log = []
 const origLog = console.log
 console.log = (...a) => log.push(a.join(' '))
 
-mod.apply(ctx, { injectMode: 'auto', verbose: true })
+mod.apply(ctx, { homeDir: seedDir, injectMode: 'auto', verbose: true, scopeMode: 'shared', roomEnabled: false })
 console.log = origLog
 
 const problems = []
 if (typeof mod.apply !== 'function') problems.push('缺少 apply 导出')
 if (!Array.isArray(mod.inject) || !mod.inject.includes('tools')) problems.push('inject 未声明 tools')
-if (tools.length < 10) problems.push(`只注册了 ${tools.length} 个工具（期望 ≥10）`)
+if (tools.length !== 22) problems.push(`注册了 ${tools.length} 个工具（期望 22）`)
 if (sections.length !== 1) problems.push(`systemPrompt.section 调用 ${sections.length} 次（期望 1）`)
 
 // 抽查一个工具的参数形态：
@@ -79,7 +81,7 @@ else {
 // 注入的段：跑一次 text()，看能不能渲染出记忆
 let rendered = ''
 if (sections[0]?.text) {
-  rendered = sections[0].text({ agent: { session: { header: { id: 'stub-session' } } } })
+  rendered = sections[0].text({ agent: { id: 'stub-session' } })
 }
 if (!rendered || !rendered.includes('电影')) problems.push(`注入段渲染异常：${JSON.stringify(rendered.slice(0, 120))}`)
 
@@ -95,5 +97,5 @@ if (problems.length) {
   for (const p of problems) console.log(`  · ${p}`)
   process.exit(1)
 }
-console.log('\n✓ 插件入口可用（工具注册 + 提示词注入 + effect 清理都正常）')
+console.log('\n✓ 插件入口可用（22 个工具注册 + 提示词注入正常；生命周期另由 real-cordis 验证）')
 process.exit(0)

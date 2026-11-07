@@ -1,377 +1,77 @@
-# 大肥鱼记忆 · 活动面板预览
+# 大肥鱼记忆 · 海边小屋研发版
 
-**本包版本：0.2.0-preview.3（预览测试版 / Pre-release）**。包含暖色记忆活动看板、操作时间线、七天统计、三维自然星光关系网，以及随插件启动的本机面板服务。公开发布状态以仓库 Releases 页面为准。
+**0.3.0-preview.5 · 预览测试版。公开下载状态以 [GitHub Releases](https://github.com/wxy11117/DSH-Memory/releases) 为准。**
 
-**请用本版替代 preview.2。** 已修复部分 Electron 运行时下，测试清理及安装升级可能沿目录链接误删源包的问题。说明见 [安装与测试清理修复](docs/PREVIEW3-FIX.md)。
+> **首次使用先区分不同的鱼。**鱼 A 选择“记忆空间1”，鱼 B 选择“记忆空间2”；同一只鱼换会话，选回原空间。未选择前不读取、保存或导入记忆。只有一只鱼也需要选择一次。
 
-- 无需安装即可打开 `dashboard/index.html` 体验演示或读取本地脑文件。
-- 已安装本预览版时，面板服务随插件自动在后台启动。想查看时对 DSH 说“给我记忆面板地址”，由 `hp_dashboard` 返回当前完整链接；点击后才打开浏览器。
-- 首次试安装请先看 [预览包安装与恢复说明](docs/TRY-PREVIEW.md)。下载或解压不会自动安装，运行安装脚本才会修改插件登记。
-- [面板使用方法、记录口径与验证情况](docs/ACTIVITY-DASHBOARD.md)。
+让每只鱼拥有自己的记忆空间和海边小屋。保留四层记忆、遗忘曲线、回忆强化、语义归纳、词语联想和暖色活动看板，新增会话绑定、小屋持久存档和 AI 房间工具。
 
-此预览基于 0.1.10 源码和已有桥接扩展开发，未自动更新运行中的插件。新记忆仍依赖 AI 调用工具保存；面板为只读展示。包内不含个人脑文件、活动日志、访问凭据或本机试运行配置。
+## 先看效果
 
----
+首次在本机试用，先双击 **tools/local-check.cmd**：读取已安装 DSH 的程序依赖，在临时目录实际检查安装、宿主启动、记忆与小屋接口、重启和卸载。不改日常 profile，不连接真实聊天模型，完成后打印报告位置。自检失败时不要替换旧插件。
 
-# DSH-Memory · 海马体记忆
+解压后，在 Windows 双击 **tools/preview-room.cmd**。
 
-给 DSH agent 一套会遗忘、会取舍、会联想的本地记忆。已通过工具写入的记录可以跨会话保存，并按当前话题加入回答上下文。GitHub 仓库名为 DSH-Memory；安装包和插件名保持 `dsh-hippocampus`。
+它自动寻找能运行 ESM 的 Node 22+，启动两个隔离的演示空间并打开浏览器。此命令不安装插件、不改 DSH profile、不读取旧记忆；关闭启动窗口即可结束。演示不调用大模型。
 
-## 下载与快速安装
-
-**当前包：0.2.0-preview.3 预览测试版。** 包含 0.1.10 对未声明服务依赖导致启动失败的修复。运行要求 Node.js 22+；现有宿主组件验证覆盖 DSH 0.2.0-rc.2 和 0.2.1-rc.4，不表示所有版本或插件组合均已验证。
-
-不要使用存在已知启动兼容问题的 0.1.9。如果旧版已出现启动失败，请参阅 [启动故障恢复](docs/STARTUP-RECOVERY.md)。
-
-1. 安装并至少启动过一次 DSH，确保已有 profile。
-2. 使用发布者提供或 Releases 对应版本中的 `dsh-hippocampus-0.2.0-preview.3.zip`，并核对附带的 SHA256SUMS.txt；不要把旧版本下载当成本次包。
-3. **完整解压**到长期保留的文件夹；不要在 ZIP 预览窗口内运行。
-4. 保留旧插件目录并备份记忆，正常退出 DSH。Windows 双击 `tools/install.cmd`，确认安装器最后报告自检成功。安装器会验证本机或 DSH 提供的 Node；找不到可用 Node 22+ 时会给出提示。
-5. 启动 DSH，先说“给我记忆面板地址”，打开完整链接确认连接。新记忆的写入与读取可用明确标注的测试内容核对，避免覆盖原有事实。
-
-**安装后保留解压目录的位置和内容。** 安装采用目录链接；移动、重命名或删除目录会使插件失效。移动后需从新位置重新运行安装器。下载安装不要求 Git 或 npm。
-
-已有 Node.js 22+ 时，也可在解压后的插件目录执行：
-
-```bash
-node tools/install.mjs
-node tools/check-install.mjs
-```
-
-## 当前能力与限制
-
-- 新记忆依赖模型调用 `hp_remember` 等工具；插件不会自动提炼保存每句对话。默认自动注入已保存的记忆，需要宿主提供 `systemPrompt` 服务。
-- 普通查询和自动注入不会自动强化；重复写入、修订、每日回忆等操作才会改变稳定性。
-- 归纳采用共同关键词和模板；联想基于词语共现。分数表示检索优先级，不是事实正确率或经过实测的回忆成功率。
-- 到点事项会进入后续回答的上下文；插件不独立推送通知，也不保证定时唤醒对话。
-- **保持 `followSession: false`。** 当前 `followSession=true` 的注入读取和工具写入空间尚未统一；默认模式跨会话共享 `space`，不是自动的多人隔离系统。
-- “永久”是稳定性层级名称，仍有衰减；注入还受条数与字符预算限制。
-
-## 记忆机制
-
-- 四层沉淀：先算一条记忆能撑多久（稳定性 S），再由 S 决定它是瞬时 / 短期 / 长期 / 永久——**层是算出来的结果，不是贴上去的标签**
-- 遗忘曲线：`R = exp(−Δtime / S)`，越久越淡；渲染时会自己说「记不太清了」「只剩个模糊的影子」
-- 回忆强化：明确的回忆强化操作使 `S × 1.6`；每日回忆等路径还会压低同类竞争项的稳定性（`S × 0.88`）
-- 语义归纳：同类至少 3 条、且有共同关键词时生成模板概括，原件归档
-- 水波纹联想：词与词反复共现就长连线，从一个词扩散 1–3 圈（想到 A，带出 B、C）
-- 坏记忆三选一：`hp_forget` 真删（留墓碑）、`hp_seal` 封存（不再主动提起，但按类检索可能翻到）、或者干脆交给遗忘曲线
-- 跨会话：默认**全局一份**（`$DSH_HOME/hippocampus/brain.json`），新会话不再失忆
-
-## 装（三种姿势，任选）
-
-### ① 一条命令装好（**不需要 `dsh` 命令行**，推荐）
-
-> 某些桌面版 DSH 环境没有 `dsh` 命令；下面的安装器可以直接登记 profile。
-**Windows：优先尝试本机或 DSH 自带的 Node 22+。** 双击 `tools/install.cmd`，或者在 PowerShell 里：
+如果电脑没有可用 Node，安装 Node 22+ 后重试；或在解压目录运行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools\install.ps1 -Dry   # 先看它准备改什么，不写文件
-powershell -ExecutionPolicy Bypass -File tools\install.ps1         # 装
-powershell -ExecutionPolicy Bypass -File tools\install.ps1 -Uninstall
+node tools/preview-room.mjs --open
 ```
 
-它按这个顺序找可用的 node：`DSH_HIPPOCAMPUS_NODE` 环境变量 → PATH 上真正的 `node.exe` → 常见安装位
-（`%ProgramFiles%\nodejs` 等）→ DSH 桌面版自带的 `node.exe` → DSH 的 `.desktop-bin\node.cmd`
-（那是用 Electron 跑的 shim，实测能跑普通脚本）。找不到就直说，并给出三条出路。
-想知道它挑了哪个：`... -CheckNode`。
+## 和自己的 AI 一起使用
 
-有 `node` 的机器（macOS / Linux / 自己装过 Node 的 Windows）直接走下面这条更省事：
+请先阅读 [本版试运行、空间绑定与费用说明](docs/ROOM-PREVIEW.md)。首次建议在独立 DSH 测试 profile 安装。不要把同名的旧、新插件同时挂在同一个 profile。
 
+本版安装器必须明确指定测试 profile。发现旧桥接、停用配置、重复实例或未建立绑定的旧脑目录时，会在改动登记前拒绝安装；不会擅自关闭旧功能或迁移旧记忆。双击 install.cmd 不会直接覆盖自动找到的日常环境。快速步骤见 [本机试用指南](docs/LOCAL-TRIAL.md)。
 
-```bash
-git clone https://github.com/wxy11117/DSH-Memory.git
-# 使用自己的 fork 时，同步更新 package.json 中四个仓库链接。
-cd DSH-Memory
-node tools/install.mjs              # 自动找 profile（web 优先）并装进去
-node tools/install.mjs --dry        # 只想看它准备改什么
-node tools/install.mjs --profile ~/.dsh/profiles/web   # 指定 profile
-node tools/install.mjs --uninstall  # 撤销（记忆库不动）
-```
+preview.5 修复了官方“注释 + []”空模板的安装问题。旧记忆可以按 [迁移指南](docs/MIGRATE-SPACES.md) 复制到新目录并登记到指定空间，保留原文件和完整备份；多个源空间可一一映射。迁移后仍由用户确认会话绑定，不会自动混合不同鱼。
 
-它完成以下登记与备份，并用 `check-install` 检查文件和配置；宿主启动需要另行验证：
+安装启用后，插件会在未绑定会话的提示词中提供首次使用引导，让 AI 提醒用户并调用 **hp_space** 给出完整设置链接。是否按提示回复取决于当前 AI；若没有出现提示，可以直接说“调用 hp_space，帮我选择记忆空间”。下载 ZIP 本身不会弹窗。首次打开设置页时，用户选择“记忆空间1”或“记忆空间2”并确认；绑定后不再显示该会话的引导。随后：
 
-1. 在 profile 的 `dependencies` 里写 `"dsh-hippocampus": "link:<本包绝对路径>"`
-2. 把包名追加进 `dsh.profile.bundles`（**漏了这一步就等于没装，而且没有任何报错**）
-3. 在 `node_modules/dsh-hippocampus` 建链接（Windows 用 junction，不需要管理员权限）
-4. 改之前把 profile 的 `package.json` 备份成 `package.json.hp-backup-<时间戳>`
+- 当前会话的记忆写入、检索和自动注入只使用所选空间。
+- 同一只鱼换会话，可以重新选择已有空间继续使用。
+- AI 能查看房间，操作灯光、窗帘、天气、时段、便签、对白、家具以及走到阳台、休息、玩电脑、喂鱼等活动。
+- 动作有 queued / running / completed / failed / cancelled / interrupted 回执；排队不代表完成。执行画面动作时，小屋页面需打开并可见。
+- 点击房间电脑里的“记忆面板”，直接打开同一空间的看板，每 60 秒读取本地数据。
+- 环境、家具、便签等存入插件管理的本地文件；正常重启后保留。
 
-输出长这样：
+已有 16 个记忆工具保留，加上 **hp_space、hp_room、hp_room_state、hp_room_action、hp_room_catalog、hp_room_life**，共 22 个工具。不同鱼通过空间隔离，不需要修改插件包名或工具前缀。
 
-```
-插件：dsh-hippocampus@0.2.0-preview.3
-profile：~/.dsh/profiles/web（web）
+## 本版新增
 
-  + dependencies["dsh-hippocampus"]   新：link:/path/to/dsh-hippocampus
-  + dsh.profile.bundles               新：在末尾加 "dsh-hippocampus"
-  + node_modules/dsh-hippocampus      新：link:/path/to/dsh-hippocampus
+- **看板进入小屋**：记忆面板左侧“进入海边小屋”，连接当前空间；小屋电脑里也能返回看板。演示、导入文件快照和未接入小屋的独立看板不会伪造可用入口。
+- **小屋界面可开关**：小屋设置中关闭三维界面与声音，保留存档和记忆工具；以后再打开。不会自动弹出或强制关闭浏览器标签页。
+- **三位动作编号**：AI 查询 hp_room_catalog，再用 hp_room_action 的 vector 参数。例如 [1,1,1] 去看海，[2,2,1] 到阁楼制作莓果酸奶杯。编号是分层动作目录，不是物理坐标或语义向量；错误编号会被拒绝。
+- **可选 AI 自主生活**：默认关闭。用户在“小屋设置”确认模型费用后开启，默认每 30 分钟、每日最多 12 次主动唤醒，可选间隔 15–240 分钟、上限 1–24 次。首次请 AI 在 DSH 会话中简短安排当天余下的生活，后续每轮选择一件；实际计划和选择取决于模型。需要页面可见和指定 DSH 会话在线空闲；关闭页面或小屋界面后暂停。每次唤醒最多允许一条小屋动作指令，不会全天不停调用模型。
 
-  ✓ 安装登记与静态自检通过。请重启 DSH，确认 hp_* 工具已激活。
-```
+详细说明、编号表、模型费用与验证边界见 [自主生活与动作编号](docs/ROOM-LIFE.md)。
 
-**重启 DSH**，确认新会话可调用 `hp_*` 工具。装完也可以再做一次静态自检：
+## 本地运行与费用
 
-```bash
-node tools/check-install.mjs     # 只读检查文件与 profile 登记；不代替真实启动验证
-```
+小屋和看板只监听 127.0.0.1，数据保存在用户电脑。默认采用独立研究目录 `hippocampus-room-preview`，不自动迁移、合并旧记忆。本版不启用 QQ 桥接。
 
-### ①' 有 `dsh` CLI 的话（服务器版 / 自己搭的）
+不同 profile 如果共用同一个 DSH_HOME，会共享宿主的会话列表、定时任务和工作区存储；不是全盘隔离。每套并行试验还应明确使用不同 homeDir。长期完全分开请配置独立 DSH_HOME，见 [本机试用指南](docs/LOCAL-TRIAL.md)。看板与小屋使用自己的随机本地端口；通过工具返回的 JSON 地址访问，见 [地址获取与脚本验收](docs/LOCAL-ENDPOINTS.md)。
 
-```bash
-dsh plugin --profile web add "link:/path/to/dsh-hippocampus"     # macOS / Linux
-dsh plugin --profile web add "link:C:\path\to\dsh-hippocampus"    # Windows
-```
+看板刷新、动作通信、三维动画和保存文件不调用大模型，也不产生模型 Token 费用。AI 理解聊天、决定动作、调用工具和记忆自动注入，仍按用户的 DSH 模型规则消耗额度。可选的自主生活开启后也使用这些额度；每日上限限制主动唤醒次数，不是模型调用、Token 或费用的硬上限。没有新增付费云同步。
 
-两个 `link:` 指向同一个东西；装完同样要重启 DSH。
+## 验证范围
 
-**装完先自检**（只读，不改任何文件）：
+验证使用本机 DSH Desktop 内附的 0.2.0-rc.2 依赖，以及独立官方 0.2.1-rc.5 依赖。覆盖真实工具执行、提示词组装、Cordis 生命周期、加载器和 boot 启动审计，并测试空间隔离、存档恢复和故障处理。浏览器验证了工具控制天气、走动、便签和小屋电脑中的看板入口。
 
-```bash
-npm run check        # 或 node tools/check-install.mjs
-```
+本版仍是研发预览：未替换用户正在运行的插件，未做正式 profile 整机安装和长期压力测试。验证细节和使用边界见 [ROOM-PREVIEW.md](docs/ROOM-PREVIEW.md)。旧版文档保留作历史参考；出现差异时以本 README 和该说明为准。
 
-它逐条检查插件文件和安装登记，红了会给出修复命令；不会执行真实 Cordis 激活。典型输出：
+## 开发与打包
 
-```
-── 插件包自身 ──
-  ✓ package.json 可解析  dsh-hippocampus@0.2.0-preview.3
-  ✓ 入口文件存在  ./lib/index.js
-  ✓ 导出 apply(ctx, config)  找到 apply
-  ✓ 补丁能挂到入口树  1 条补丁 → 1 个入口；首个 id=hippocampus name=dsh-hippocampus
-  ✓ 宿主应用补丁时无告警  0 条
-  ✓ 声明 @deepseek-ai/dsh-tools 为 peer  @deepseek-ai/dsh-tools @ *
-
-── profile 登记 ──
-  ✓ 找到 profile  ~/.dsh/profiles/web
-  ✗ dependencies 里有这个包  没有 dsh-hippocampus
-     → node tools/install.mjs --profile ~/.dsh/profiles/web
-  ✗ bundles 里登记了  bundles 里没有 dsh-hippocampus —— 就算装了也不会被加载
-```
-
-最常见的两个「装了但没反应」：**忘了 `dependencies`**，或**只装了没加进 `dsh.profile.bundles`**（后者等于没装）。`--profile <目录>` 可以指定别的位置，`--json` 给脚本用。
-
-### 宿主到底怎么把它装进来（源码级，便于排错）
-
-DSH 的加载链路在 `@deepseek-ai/dsh-app-boot`：读 profile → 读每个 bundle 的 patch → 按顺序应用 → 得到入口树 → cordis 逐个 import + `apply`。三个关键事实：
-
-1. **bundle 必须自己在 `package.json` 里声明补丁文件**
-   ```json
-   { "dsh": { "bundle": { "patch": "cordis.patch.yml" } } }
-   ```
-   漏了这一句，宿主读不到你的补丁，只会往 stderr 打一行
-   `skipping profile bundle "<你的包名>": profile bundle "<包名>" declares no dsh.bundle in its package.json`。
-   包已经装进 `node_modules`、`bundles` 里也写了名字，但**插件永远不会被加载**——这是最隐蔽的一种失败。
-
-2. **补丁的语义由 `applyEntryPatches` 决定**（app-boot 里约 60 行）
-   - `- insert:` 里没有 `id` → 追加到**根入口列表**（本插件用这条）
-   - `- insert:` 带 `id` → 目标必须是 `group: true` 的入口，插进它的 `config` 数组
-   - 没有 `insert` 的补丁行 → 必须给 `id`，目标必须存在，再按剩下的字段覆盖
-   - 目标不存在、不是 group、`name` 与目标不一致 → 只在 stderr 告警然后**跳过**
-
-3. **入口的字段只有六个**（`EntryOptions`，见 `cordis-plugin-loader/src/config/entry.ts`）
-   `id` / `name` / `config` / `group` / `disabled` / `inject`。其中 `id` 就是命名空间：工具名、存储目录、日志前缀都靠它；`name` 必须与**安装后的包名**完全一致。
-
-这套语义在本仓库里有一份逐行移植：`tools/patch-parse.mjs`（`parsePatchYaml` / `applyEntryPatches` / `composeEntries`），`check-install` 就是用它算出「宿主会看到的那份入口树」，`tests/loader.test.mjs` 则把上面每条分支都测了一遍——**补丁写错不会报错，只会静默不生效**，所以这部分必须有测试。
-
-手工登记（不想用 CLI 时）：
-
-```json
-{
-  "dependencies": { "dsh-hippocampus": "link:C:/path/to/dsh-hippocampus" },
-  "dsh": { "profile": { "bundles": ["...", "dsh-hippocampus"] } }
-}
-```
-
-
-### ② 别人拿到你的仓库（不改他的 profile）
-
-同样两步：软链（或直接 `npm i` 到 profile 目录里）+ profile 里登记插件名。插件只依赖宿主注入的 `ctx`，不需要额外构建。
-
-### ③ 只当库用（自己写 agent）
-
-```js
-import { createStore } from 'dsh-hippocampus/store'
-import * as hp from 'dsh-hippocampus/engine'
-
-const store = createStore({ dir: './my-memory' })
-store.load()
-const st = store.stateFor('main')
-hp.remember(st, { text: '她说她对芒果过敏，别再买芒果了', category: 'person' })
-store.touch(); store.flush()
-console.log(hp.render(st))   // 就是可以塞进提示词的那段
-```
-
-可跑的完整例子：`node examples/embed.mjs --temp`（写 4 条 → 按话头回忆 → 渲染 → 统计 → 落盘，全程只用一个 JSON 文件）。
-
-> 小陷阱：引擎的 `retrieve()` 返回 `[{ item, score, base }]`，不是摊平的记忆对象——第一次用很容易写出 `rows[0].text === undefined`。
-
-### ④ 把已有记忆搬过来
-
-```bash
-node tools/migrate.mjs --from "…\某处\brain.json" --list      # 先看源里有哪些空间、各多少条
-node tools/migrate.mjs --from "…\某处\brain.json" --dry       # 预演合并结果，不写盘
-node tools/migrate.mjs --from "…\某处\brain.json" --from-space "private:<你的QQ号>" \
-     --to "%APPDATA%\dsh-desktop\harness\hippocampus" --to-space default
-```
-
-合并规则：同 id 取更晚那版、墓碑（删过的）不复活、归档/关系网边一并带过来；想整份覆盖加 `--mode replace`。
-既认本插件的 `{ brain: … }` 格式，也认 QQ 桥接那类「侧车」平铺格式。
-
-## 配置
-
-`cordis.patch.yml` 里可以给插件传 config（schemastery 会校验；不传就用默认值）：
-
-| 键 | 默认 | 说明 |
-|---|---|---|
-| `enabled` | `true` | 关掉 = 不挂工具、不注入 |
-| `homeDir` | `""` | 记忆库目录；空 = `$DSH_HOME/hippocampus` |
-| `space` | `"default"` | 记忆空间名（换名字 = 换一个脑） |
-| `followSession` | `false` | 当前请保持 false；true 的注入读与工具写空间尚未统一 |
-| `injectMode` | `"auto"` | `auto` = 每轮自动注入（默认，装上就生效）；`tool` = 不注入，让 agent 自己调 `hp_digest`（省 token） |
-| `injectMaxChars` | `2600` | 自动注入的上限字符数 |
-| `recallHour` / `recallMinute` | `21` / `5` | 每天「固定回忆」的时刻 |
-| `recallCount` | `3` | 每次回忆几条 |
-| `sweepMinutes` | `1` | 清算（遗忘/升层）周期 |
-| `verbose` | `true` | 打印挂载与落盘日志 |
-
-> `injectMode: "auto"` 会用 `ctx.systemPrompt.section()` 每轮把记忆挂进系统提示词（order 400）。
-> DSH 0.2 的提示词上下文只有 `agent/scope` 时，插件从 `agent/inbox/claimed` 事件取得当轮用户话语；
-> 其他接入可直接传入 `userText`、`messages` 或 `conversation.messages`。话题按 agent 隔离。
->
-> **兼容性**：主插件声明必需服务 `tools`；自动注入通过 `ctx.inject(['systemPrompt'], callback)` 注册独立子插件，并仅在该子插件的上下文中读取服务。缺少提示词服务时工具仍可激活；服务后续出现时才挂载注入段，服务移除时由 Cordis 清理该段。`tests/real-cordis.mjs` 使用真实 Cordis 代理和生命周期验证这些场景。
-
-## 工具（16 个）
-
-| 工具 | 干什么 |
-|---|---|
-| `hp_remember` | 记一件事（分类/重要度/层可以不给，引擎自己算） |
-| `hp_recall` | 按话头回忆（有检索打分与补位，不是全量 dump） |
-| `hp_digest` | 拿一段可直接塞进提示词的记忆摘要；`text` 传话题，兼容 `query` 别名 |
-| `hp_list` / `hp_get` | 看清单 / 看单条（带最近一次订正前的原文） |
-| `hp_revise` | 订正（留 `oldText`，版本往后偏） |
-| `hp_forget` | 真删（留墓碑，合并时不许复活） |
-| `hp_seal` | 封存（不再主动提起） |
-| `hp_pin` | 钉住（不可遗忘，每轮单列） |
-| `hp_person` | 记/查「人」 |
-| `hp_stats` | 统计（分层/分类/归档/关系网/平均留存） |
-| `hp_sweep` | 手动跑一次清算 |
-| `hp_recall_daily` | 手动跑一次「固定回忆」 |
-| `hp_export` / `hp_import` | 导出整库（`format: "json"` 备份 / `"md"` 人可读）/ 导入（可换机器） |
-| `hp_dashboard` | 获取随插件启动的本地面板地址；页面可见时每 60 秒读取最新状态 |
-
-## CLI（不装 DSH 也能用）
-
-```bash
-node tools/hp.mjs remember "她说她对芒果过敏" --cat person
-node tools/hp.mjs digest
-node tools/hp.mjs stats
-node tools/hp.mjs doctor        # 自检：目录、权限、文件大小
-```
-
-## 数据在哪
-
-- 默认 `$DSH_HOME/hippocampus/brain.json`（Windows: `%APPDATA%\dsh-desktop\harness\hippocampus\brain.json`）
-- 纯 JSON、单文件、原子写（临时文件 + rename）；默认节流 1.5 秒，正常卸载或进程退出时补刷。强杀、断电可能丢失尚未保存的变化；请正常退出并保留备份。
-- 插件自身不直接上传记忆、不依赖数据库；可使用导入/导出工具备份。被注入的记忆会成为模型请求上下文，可能随 DSH 请求发送到你选择的模型服务商，具体取决于宿主和模型配置。
-
-## 测试
-
-```bash
-npm test               # 引擎、工具、归档、CLI、示例互通、安装与发布检查
-npm run smoke          # 假宿主冒烟：16 个工具注册 + 提示词注入 + 卸载清理
-npm run smoke:noprompt # 兼容性：宿主没有 ctx.systemPrompt 时工具照常在、不自动注入
-npm run test:loader    # 真加载器：DSH 的 profile 会把它装成入口吗（需要 DSH_HOST_MODULES）
-npm run test:real      # 真宿主契约：真 defineTool + 真 schema 校验（需要 DSH_HOST_MODULES）
-npm run test:cordis    # 真实服务代理、启动激活与卸载重载（需要 DSH_HOST_MODULES）
-```
-
-没有 npm 时使用 `node --test tests/*.test.mjs`。测试总数以本次输出为准。
-
-## 生成发布包
-
-```bash
+```powershell
+node --test tests/*.test.mjs
 node tools/pack.mjs
 node tools/release-check.mjs --zip
 ```
 
-ZIP 默认生成在包目录的上一层，文件名来自当前版本号。打包器使用发布白名单，保留 GitHub 工作流，
-排除 `.hp-example` 等本地运行数据。检查器会读取 ZIP 的真实条目，解压检查内容、校验 CRC，
-并逐文件核对它是否与当前源码一致。不要把整个工作目录直接压缩作为发布包。
+测试和依赖验证使用临时目录。源码安装钩子已取消；`npm install` 不会自动登记到 DSH。需要安装时明确运行 tools/install.mjs 并指定测试 profile。
 
-各类验证的范围不同；入口树和工具契约通过，不能替代启动激活验证：
+代码沿用 MIT；人物素材和星表有各自的权利及许可说明，见 [ROOM-ASSETS.md](docs/ROOM-ASSETS.md)。
 
-| 测试 | 用什么 | 证明什么 |
-|---|---|---|
-| `loader.test.mjs`（16） | 我们自己移植的 `applyEntryPatches` | 补丁语义按宿主的规则跑（根插入 / group / 覆盖 / 告警） |
-| **`real-loader.mjs`** | 宿主的 `loadProfileDirectory` + `composeEntries` | **profile 里登记了 → 包被解析 → 补丁被加载 → 入口树里真的多出 `hippocampus` 一行** |
-| `real-host.mjs` | 宿主的 `defineTool` / `parameterSchemaSpecToJsonSchema` / `validateJsonSchemaValue` | 16 个工具的参数 DSL 会被宿主接受、注入段会被宿主渲染 |
-| `real-cordis.mjs` | 真实 Cordis Context、tools、systemPrompt | 两种导出均能激活；服务缺失、后置、替换及插件重载符合预期 |
-
-### 需要 `DSH_HOST_MODULES` 的测试怎么跑
-
-三个测试直接加载 DSH 自带的宿主包，其中 `real-cordis` 还实际运行插件生命周期。完整用户 profile 中其他插件的配置与兼容性需要另外核对。
-
-准备宿主包（任选其一）：
-
-```bash
-# A. 你有 DSH 的 node_modules（npm 全局装的）
-set DSH_HOST_MODULES=%APPDATA%\npm\node_modules\@deepseek-ai
-
-# B. 桌面版（Electron asar 包）：把里面的 node_modules/@deepseek-ai 解出来
-npx @electron/asar extract "C:\...\DSH Desktop\resources\app.asar" %TEMP%\hp-asar
-# 解出来的是整棵目录树；缺什么它会报 `Cannot find package 'X'`，把它们补齐即可
-# real-host 还会使用 dsh-agent 的正式输入事件与 assembleContextFor，需一起提供该包及依赖。
-# （跑 real-loader 还需要 @deepseek-ai/dsh-app-boot 及其依赖：cordis-plugin-group、
-#   dsh-home-paths、dsh-launch-environment、dsh-package-manifest、dsh-atomic-write、semver、js-yaml…）
-set DSH_HOST_MODULES=%TEMP%\hp-asar\node_modules\@deepseek-ai
-```
-
-> `test:real`、`test:loader` 和 `test:cordis` 是开发者验收。发布前必须实际执行，不能把跳过当作通过。
-> 普通使用者可先跑 `node tools/check-install.mjs`，然后重启 DSH，确认插件激活且工具可调用。
-
-`npm run test:loader` 的实际输出（真加载器跑出来的）：
-
-```
-Harness home：C:\...\Temp\hp-loader-tQckOX
-profile：web
-加载到 1 层
-  ✓ 我们的包被认出来了：dsh-hippocampus@0.1.3
-  ✓ 补丁文件：cordis.patch.yml（解析出 1 条补丁行）
-  ✓ 入口树：1 个入口，其中 hippocampus → dsh-hippocampus，告警 0 条
-  ✓ 没有被跳过的 bundle
-  ✓ 兼容性判定：无问题
-✓ 真加载器通过：dsh-hippocampus@0.1.3 会被 DSH 加载成入口 hippocampus
-```
-
-不设 `DSH_HOST_MODULES` 时这三个测试会明确跳过（退出码 0）；这个结果不表示宿主启动已验证。普通单测另有不依赖宿主包的严格服务访问回归。
-
-## 已知限制
-
-- 检索是 **2-gram 字面重合**，不懂同义词（「火锅」不会自动匹配「涮锅」）
-- 所有基线（各类的 baseHours、加成、阈值）都是手调的，没有学习
-- 归档容量 600 条，超出后真丢最旧的细节
-- 「人」的初始半衰期 240 小时，三个月不提才会淡出——不在意的人也会被记得很久
-- 自动注入（`injectMode: "auto"`）是默认路径，每轮占几百到两千多字符上下文；**在意 token 就设 `"tool"`**，让她需要时自己调 `hp_digest`
-
-## 仓库结构
-
-```
-lib/            引擎（hippocampus.js）、宿主接入（index.js）、话题提取（topic.js）、落盘（store.js）、宿主依赖解析（hostdeps.mjs）
-tools/          install.mjs（一条命令装进 profile，不需要 dsh CLI）、check-install.mjs（装之前/之后自检）、
-                hp.mjs（CLI）、migrate.mjs（把旧 brain.json 搬过来）、
-                patch-parse.mjs（加载补丁解析）、pack.mjs（白名单打包）、release-check.mjs（源码与最终 ZIP 检查）
-examples/       embed.mjs（不装 DSH 当库用的最小例子）
-tests/          engine.test.mjs（14 条）、install.test.mjs（9 条）、loader.test.mjs（16 条）、
-                install-flow.test.mjs（11 条：装/幂等/卸载/坏输入）、
-                smoke-host.mjs（假宿主）、real-host.mjs（真宿主契约）
-docs/           DESIGN.md（设计取舍）、PUBLISH.md（怎么发出去）
-cordis.patch.yml  DSH 的加载声明——少了这个文件插件不会被加载
-```
-
-## 发布
-
-见 [`docs/PUBLISH.md`](docs/PUBLISH.md)：GitHub 网页上传 / 装 git 后 push / npm 发布三种路线，外加发布前检查单。
-`.github/workflows/test.yml` 会在 Node 22 与 24 上跑 `test` + `smoke` + `example` + CLI 自检。
-
-## License
-
-MIT
+[项目仓库](https://github.com/wxy11117/DSH-Memory) · [现有宣传官网](https://wxy11117.github.io/DSH-Memory/)

@@ -19,6 +19,8 @@ param(
   [string]$Profile,
   [string]$Plugin,
   [switch]$CheckNode,
+  [switch]$PreviewRoom,
+  [switch]$LocalCheck,
   [switch]$Help
 )
 
@@ -34,7 +36,9 @@ function Write-Ok($m)   { [Console]::Out.WriteLine([string]$m) }
 if ($Help) {
   $usage = @"
 用法（Windows）：
-  powershell -ExecutionPolicy Bypass -File tools\install.ps1                 装进自动找到的 profile
+  powershell -ExecutionPolicy Bypass -File tools\install.ps1 -LocalCheck   使用本机 DSH 依赖隔离验证，不安装到日常环境
+  powershell -ExecutionPolicy Bypass -File tools\install.ps1 -PreviewRoom  仅独立预览小屋，不安装插件
+  powershell -ExecutionPolicy Bypass -File tools\install.ps1                 预览版会提示必须指定测试 profile
   powershell -ExecutionPolicy Bypass -File tools\install.ps1 -Dry            只打印计划，不改文件
   powershell -ExecutionPolicy Bypass -File tools\install.ps1 -Uninstall      撤销
   powershell -ExecutionPolicy Bypass -File tools\install.ps1 -Profile <目录> 指定 profile
@@ -49,7 +53,7 @@ Write-Info $usage
 }
 
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
-$installer = Join-Path $here 'install.mjs'
+$installer = Join-Path $here $(if ($LocalCheck) { 'local-check.mjs' } elseif ($PreviewRoom) { 'preview-room.mjs' } else { 'install.mjs' })
 if (-not (Test-Path -LiteralPath $installer)) {
   Write-Bad "找不到 $installer —— 这个脚本要和 install.mjs 放在同一个 tools 目录里。"
   exit 1
@@ -179,6 +183,8 @@ if ($Uninstall) { $extra += '--uninstall' }
 if ($Dry) { $extra += '--dry' }
 if ($Profile) { $extra += @('--profile', $Profile) }
 if ($Plugin) { $extra += @('--plugin', $Plugin) }
+if ($PreviewRoom) { $extra = @('--open') }
+if ($LocalCheck) { $extra = @(); $env:ELECTRON_NO_ASAR = '1' }
 
 try {
   $global:LASTEXITCODE = $null

@@ -1,138 +1,56 @@
-/**
- * tools/migrate.mjs —— 把「已有的 brain.json」搬进本插件的记忆库
- * ============================================================================
- * 典型场景：先在别处（比如 QQ 桥接的 `state/brain.json`）养了一批记忆，
- * 现在换成这套插件，不想从零开始。
- *
- *   node tools/migrate.mjs --from <源 brain.json> --list
- *   node tools/migrate.mjs --from <源 brain.json> --dry
- *   node tools/migrate.mjs --from <源 brain.json> [--from-space <key>] [--to <家目录>] [--to-space default]
- *
- * 合并语义：同 id 取「更晚的那版」；墓碑（已删）不会被复活；
- * 源里独有的条目/关系网边/归档都会带过来。想整份覆盖就加 --mode replace。
- * ============================================================================
- */
-import fs from 'node:fs'
-import os from 'node:os'
-import path from 'node:path'
+#!/usr/bin/env node
+/** 0.3 preview: copy legacy spaces into a NEW offline directory with a complete source backup. */
+import fs from 'node:fs';
+import {readSource,listSource,parseJson,planMigration,migrateSnapshot} from './memory-migration.mjs';
 
-import { ensureBrain, mergeBrains } from '../lib/hippocampus.js'
-import { createStore } from '../lib/store.js'
+const help=`用法（在插件解压目录执行，先正常退出使用旧库的程序）：
+  node tools/migrate.mjs --from "<旧 brain.json>" --list
+  node tools/migrate.mjs --from "<旧 brain.json>" --from-space "<旧空间>" --to "<尚不存在的新目录绝对路径>" --to-space "记忆空间1" --dry
+  node tools/migrate.mjs --from "<旧 brain.json>" --from-space "<旧空间>" --to "<同一新目录>" --to-space "记忆空间1"
+  node tools/migrate.mjs --from "<旧 brain.json>" --map "<空间映射.json>" --to "<新目录>" --dry
 
-const argv = process.argv.slice(2)
-const arg = (name, fallback = '') => {
-  const i = argv.indexOf(`--${name}`)
-  return i >= 0 && argv[i + 1] ? argv[i + 1] : fallback
-}
-const has = (name) => argv.includes(`--${name}`)
+--map 格式：[{"from":"old-a","to":"记忆空间1"},{"from":"old-b","to":"记忆空间2"}]
+可追加 --json 输出机器可读结果。源只有一个空间时可省略 --from-space。
+只复制到尚不存在的新目录，保留完整原始备份、生成 spaces.json；不修改源、不改 profile、不绑定会话。
+本预览不支持向现有库 merge/replace。迁移后按 docs/MIGRATE-SPACES.md 核对并选择绑定。`;
 
-const from = arg('from')
-const listOnly = has('list')
-const dry = has('dry')
-const mode = arg('mode', 'merge')
-const toSpace = arg('to-space', 'default')
-const fromSpaceArg = arg('from-space')
-
-if (!from) {
-  console.log(`用法：
-  node tools/migrate.mjs --from <源 brain.json> --list
-  node tools/migrate.mjs --from <源 brain.json> --dry
-  node tools/migrate.mjs --from <源 brain.json> [--from-space <key>] [--to <家目录>] [--to-space default] [--mode merge|replace]`)
-  process.exit(2)
-}
-
-if (!fs.existsSync(from)) {
-  console.error(`✗ 源文件不存在：${from}`)
-  process.exit(1)
-}
-
-let src
-try {
-  src = JSON.parse(fs.readFileSync(from, 'utf8'))
-} catch (e) {
-  console.error(`✗ 源文件不是合法 JSON：${e.message}`)
-  process.exit(1)
-}
-const convs = src.conversations && typeof src.conversations === 'object' ? src.conversations : null
-if (!convs) {
-  console.error('✗ 源文件里没有 conversations（不是 brain.json 格式）')
-  process.exit(1)
-}
-
-const keys = Object.keys(convs)
-/** 两种格式都认：
- *   · 本插件 / store.js：conversations[k] = { brain: {…} }
- *   · QQ 桥接的侧车 brain.json：conversations[k] = { items, persons, web, … }（没有 brain 这层） */
-const brainOf = (conv) => (conv && typeof conv === 'object' ? (conv.brain ?? conv) : null)
-const summarize = (brain) => {
-  const b = brain || {}
-  return {
-    items: Array.isArray(b.items) ? b.items.length : 0,
-    archive: Array.isArray(b.archive) ? b.archive.length : 0,
-    persons: Array.isArray(b.persons) ? b.persons.length : 0,
-    words: b.web?.words ? Object.keys(b.web.words).length : 0,
-    edges: b.web?.edges ? Object.keys(b.web.edges).length : 0,
-    tombstones: b.tombstones ? Object.keys(b.tombstones).length : 0,
+const argv=process.argv.slice(2),options={};
+let usageError=false;
+try{
+  const values=new Set(['from','from-space','to','to-space','map','mode']);
+  for(let i=0;i<argv.length;i++){
+    const key=argv[i].replace(/^--/,'');
+    if(argv[i]==='-h'||key==='help'){console.log(help);process.exit(0)}
+    if(!argv[i].startsWith('--')||(!values.has(key)&&!['dry','list','json'].includes(key))||Object.hasOwn(options,key)){usageError=true;throw new Error('未知或重复参数；--help 查看用法')}
+    if(values.has(key)){
+      const value=argv[++i];if(!value||value.startsWith('--')){usageError=true;throw new Error('--'+key+' 缺少参数值')}
+      options[key]=value;
+    }else options[key]=true;
   }
-}
-
-console.log(`源：${from}`)
-console.log(`会话（记忆空间）${keys.length} 个：`)
-for (const k of keys) {
-  const s = summarize(brainOf(convs[k]))
-  console.log(`  · ${k.padEnd(24)} 记忆 ${String(s.items).padStart(3)} · 归档 ${String(s.archive).padStart(3)} · 人 ${s.persons} · 关系网 ${s.words} 词/${s.edges} 边${s.tombstones ? ` · 墓碑 ${s.tombstones}` : ''}`)
-}
-
-if (listOnly) process.exit(0)
-
-/* ── 选源空间 ── */
-let fromSpace = fromSpaceArg
-if (!fromSpace) {
-  if (keys.length === 1) {
-    fromSpace = keys[0]
-    console.log(`\n源只有一个空间，自动选：${fromSpace}`)
-  } else {
-    const richest = keys
-      .map((k) => ({ k, n: summarize(brainOf(convs[k])).items }))
-      .sort((a, b) => b.n - a.n)[0]
-    console.error(`\n✗ 源里有 ${keys.length} 个空间，请用 --from-space 指定（记忆最多的是 ${richest.k}，${richest.n} 条）`)
-    process.exit(1)
+  if(!options.from){usageError=true;throw new Error('缺少 --from；--help 查看用法')}
+  if(options.mode&&options.mode!=='copy')throw new Error('本预览只允许 copy 到新目录；merge/replace 已停用，避免覆盖旧库或合并不同鱼。见 docs/MIGRATE-SPACES.md');
+  const source=readSource(options.from);
+  let result;
+  if(options.list){
+    result={ok:true,source:source.source,sha256:source.sha256,spaces:listSource(source)};
+  }else{
+    const mapping=options.map?parseJson(fs.readFileSync(options.map),'映射文件'):undefined;
+    const plan=planMigration(source,{fromSpace:options['from-space'],toSpace:options['to-space'],mapping});
+    result=migrateSnapshot(source,plan,options.to,{dry:!!options.dry});
   }
+  if(options.json)console.log(JSON.stringify(result,null,2));
+  else if(options.list){
+    for(const row of result.spaces)console.log(`${row.space}：活记忆 ${row.items}，归档 ${row.archive}，关系网 ${row.words} 词 / ${row.edges} 边，墓碑 ${row.tombstones}`);
+    console.log('请确认每个旧空间属于哪只鱼；不会自动猜测归属。');
+  }else{
+    for(const row of result.mappings)console.log(`${row.from} → ${row.to}：活记忆 ${row.items}，归档 ${row.archive}`);
+    console.log(`${result.dry?'预演':'已复制'}：活记忆 ${result.copiedItems} 条，归档 ${result.copiedArchive} 条，跳过条目 ${result.skippedItems} 条。`);
+    console.log(`未选择空间 ${result.unselectedSpaces.length} 个，仍完整保留在源文件${result.dry?'':'及原始备份'}中。`);
+    console.log(result.dry?'--dry：未创建目录、备份或空间登记。':`完整源文件备份：${result.backup}\n结果报告：${result.target}/migration-report.json`);
+    console.log('源文件未修改。目标未绑定任何会话；按 docs/MIGRATE-SPACES.md 设置测试 homeDir，再调用 hp_space 由用户确认。');
+  }
+}catch(error){
+  if(options.json||argv.includes('--json'))console.log(JSON.stringify({ok:false,error:error.message}));
+  else console.error('✗ '+error.message);
+  process.exitCode=usageError?2:1;
 }
-const srcBrain = ensureBrain({ brain: brainOf(convs[fromSpace]) })
-const srcSum = summarize(srcBrain)
-
-/* ── 目标 ── */
-const homeDir = arg('to') || process.env.HP_HOME ||
-  (process.env.DSH_HOME ? path.join(process.env.DSH_HOME, 'hippocampus') : path.join(os.homedir(), '.dsh', 'hippocampus'))
-
-const store = createStore({ dir: homeDir, log: () => {} })
-store.load()
-const destConv = store.stateFor(toSpace)
-const destBrain = ensureBrain(destConv)
-const beforeSum = summarize(destBrain)
-
-console.log(`\n目标：${path.join(homeDir, 'brain.json')}（空间 ${toSpace}）`)
-console.log(`合并前：记忆 ${beforeSum.items} · 归档 ${beforeSum.archive} · 人 ${beforeSum.persons} · 关系网 ${beforeSum.words} 词/${beforeSum.edges} 边`)
-
-/* ── 合并或替换 ── */
-let merged
-if (mode === 'replace') {
-  merged = JSON.parse(JSON.stringify(srcBrain))
-} else {
-  merged = mergeBrains(srcBrain, destBrain)
-}
-const afterSum = summarize(merged)
-console.log(`合并后：记忆 ${afterSum.items} · 归档 ${afterSum.archive} · 人 ${afterSum.persons} · 关系网 ${afterSum.words} 词/${afterSum.edges} 边`)
-console.log(`增量：记忆 +${afterSum.items - beforeSum.items} · 归档 +${afterSum.archive - beforeSum.archive} · 人 +${afterSum.persons - beforeSum.persons} · 边 +${afterSum.edges - beforeSum.edges}`)
-
-if (dry) {
-  console.log('\n--dry：什么都没写。去掉 --dry 才会真的落盘。')
-  process.exit(0)
-}
-
-destConv.brain = merged
-store.touch()
-store.flush()
-console.log(`\n✓ 已写入：${store.file}`)
-console.log('提醒：如果目标机器上 DSH 正跑着，插件进程里是旧状态，重启后才会看到这批记忆。')

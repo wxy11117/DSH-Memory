@@ -1,7 +1,7 @@
 {
   "name": "dsh-hippocampus",
-  "version": "0.2.0-preview.3",
-  "description": "拟人记忆插件 for DSH：四层记忆 + 遗忘曲线 + 越想起越牢 + 语义归纳 + 水波纹联想；一个 agent 装上就能跨会话记住人和事。",
+  "version": "0.3.0-preview.5",
+  "description": "DSH 记忆空间与海边小屋研发版：会话绑定、四层记忆、本地看板、AI 房间动作与持久存档",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -23,7 +23,8 @@
     "README.md",
     "CHANGELOG.md",
     "LICENSE",
-    "dashboard"
+    "dashboard",
+    "room"
   ],
   "keywords": [
     "dsh",
@@ -35,8 +36,6 @@
     "long-term-memory"
   ],
   "scripts": {
-    "install": "node tools/install.mjs",
-    "uninstall": "node tools/install.mjs --uninstall",
     "test": "node --test tests/*.test.mjs",
     "smoke": "node tests/smoke-host.mjs",
     "smoke:noprompt": "node tests/smoke-noprompt.mjs",
@@ -52,7 +51,11 @@
     "cli": "node tools/hp.mjs",
     "doctor": "node tools/hp.mjs doctor",
     "dashboard": "node tools/dashboard.mjs --open",
-    "dashboard:demo": "node tools/dashboard.mjs --demo --open"
+    "dashboard:demo": "node tools/dashboard.mjs --demo --open",
+    "preview:room": "node tools/preview-room.mjs --open",
+    "test:room:host": "node tests/real-room.mjs",
+    "dsh:install": "node tools/install.mjs",
+    "dsh:uninstall": "node tools/install.mjs --uninstall"
   },
   "repository": {
     "type": "git",
@@ -87,7 +90,7 @@
   },
   "meta": {
     "title": "海马体记忆",
-    "description": "四层记忆 / 遗忘曲线 / 越想起越牢 / 语义归纳 / 水波纹联想，跨会话不丢。",
+    "description": "DSH 记忆空间与海边小屋研发版：会话绑定、四层记忆、本地看板、AI 房间动作与持久存档",
     "contributors": [
       "大肥鱼"
     ],

@@ -45,6 +45,70 @@ const readPkg = (dir) => JSON.parse(fs.readFileSync(path.join(dir, 'package.json
 const linkAt = (dir) => path.join(dir, 'node_modules', NAME);
 
 describe('install.mjs', () => {
+  test('official commented [] profile installs without rewriting its YAML', () => {
+    const dir=makeProfile(),file=path.join(dir,'cordis.patch.yml');
+    const template='# Your patch layer for this dsh profile\r\n# a top-level YAML array of loader patch entries\r\n[]\r\n';
+    fs.writeFileSync(file,template);
+    assert.equal(run(['--profile',dir,'--dry']).code,0);
+    assert.equal(fs.existsSync(linkAt(dir)),false);
+    const installed=run(['--profile',dir]);assert.equal(installed.code,0,installed.err);
+    assert.equal(fs.readFileSync(file,'utf8'),template);
+    assert.equal(fs.existsSync(linkAt(dir)),true);
+    assert.equal(run(['--profile',dir,'--uninstall']).code,0);
+    assert.equal(fs.readFileSync(file,'utf8'),template);
+  });
+
+  test('预览版未指定 profile 时不触碰自动发现的日常环境', () => {
+    const harness=path.join(fixture.root,'daily-home'),dir=path.join(harness,'profiles','web');
+    fs.mkdirSync(dir,{recursive:true});
+    const file=path.join(dir,'package.json'),before='{"name":"daily","private":true}';fs.writeFileSync(file,before);
+    const r=run([],{DSH_HOME:harness});
+    assert.equal(r.code,1);assert.match(r.err,/显式指定测试 profile/);
+    assert.equal(fs.readFileSync(file,'utf8'),before);assert.deepEqual(fs.readdirSync(dir),['package.json']);
+  });
+
+  for(const [label,patch] of [
+    ['桥接配置','- id: hippocampus\n  config:\n    externalApi: http://127.0.0.1:3100\n    externalToken: do-not-print-this-value\n'],
+    ['停用配置','- id: hippocampus\n  disabled: true\n'],
+    ['重复入口','- insert:\n    - id: second-memory\n      name: dsh-hippocampus\n'],
+  ])test(label+' 在写入前拒绝，配置和链接不变',()=>{
+    const dir=makeProfile(),file=path.join(dir,'package.json'),before=fs.readFileSync(file);
+    fs.writeFileSync(path.join(dir,'cordis.patch.yml'),patch);
+    const result=run(['--profile',dir,'--json']);assert.equal(result.code,1);
+    assert.equal(JSON.parse(result.out).ok,false);assert.doesNotMatch(result.out,/do-not-print-this-value/);
+    assert.ok(JSON.parse(result.out).nextSteps.some(step=>step.includes('--dry')));
+    assert.deepEqual(fs.readFileSync(file),before);assert.equal(fs.existsSync(linkAt(dir)),false);
+    assert.equal(fs.readFileSync(path.join(dir,'cordis.patch.yml'),'utf8'),patch);
+    assert.equal(fs.readdirSync(dir).some(n=>n.includes('hp-backup')),false);
+  });
+
+  test('相同工具家族的另一实例阻止叠装',()=>{
+    const dir=makeProfile({bundles:['dsh-hippocampus-yan']});
+    const result=run(['--profile',dir]);assert.equal(result.code,1);assert.match(result.err,/其他 hippocampus/);
+    assert.equal(fs.existsSync(linkAt(dir)),false);
+  });
+
+  test('旧脑目录不在预览安装时原地接管',()=>{
+    const dir=makeProfile(),old=path.join(fixture.root,'legacy-memory');fs.mkdirSync(old);
+    fs.writeFileSync(path.join(old,'brain.json'),'private sentinel');
+    fs.writeFileSync(path.join(dir,'cordis.patch.yml'),'- id: hippocampus\n  config:\n    homeDir: '+JSON.stringify(old)+'\n');
+    const result=run(['--profile',dir]);assert.equal(result.code,1);assert.match(result.err,/旧记忆库/);
+    assert.match(result.err,/tools\/migrate.mjs/);assert.match(result.err,/MIGRATE-SPACES.md/);
+    assert.equal(fs.readFileSync(path.join(old,'brain.json'),'utf8'),'private sentinel');
+  });
+
+  test('缺少 --profile 的值是用法错误',()=>{
+    assert.equal(run(['--profile']).code,2);assert.equal(run(['--profile','--dry']).code,2);
+  });
+
+  test('不完整解析不能掩盖后续桥接配置',()=>{
+    const dir=makeProfile(),file=path.join(dir,'package.json'),before=fs.readFileSync(file);
+    fs.writeFileSync(path.join(dir,'cordis.patch.yml'),'- id: unrelated\n  config:\n    prompt: |\n      multiline text\n- id: hippocampus\n  config:\n    externalApi: http://127.0.0.1:3100\n');
+    const result=run(['--profile',dir,'--dry','--json']);assert.equal(result.code,1);
+    assert.match(JSON.parse(result.out).error,/无法可靠解析/);
+    assert.deepEqual(fs.readFileSync(file),before);assert.equal(fs.existsSync(linkAt(dir)),false);
+  });
+
   test('--dry：只打印计划，一个字节都不写', () => {
     const dir = makeProfile();
     const before = fs.readFileSync(path.join(dir, 'package.json'), 'utf8');

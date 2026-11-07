@@ -15,7 +15,7 @@
  */
 
 /** YAML 子集解析：块序列 / 块映射 / 内联 [..] 与 {..} / 引号 / 布尔数字 null。 */
-export function parsePatchYaml(text) {
+export function parsePatchYaml(text, { requireComplete = false } = {}) {
   const lines = [];
   for (const raw of String(text ?? '').split(/\r?\n/)) {
     const cleaned = stripComment(raw);
@@ -23,7 +23,8 @@ export function parsePatchYaml(text) {
     lines.push({ indent: cleaned.match(/^ */)[0].length, text: cleaned.trim() });
   }
   if (!lines.length) return [];
-  const [value] = parseBlock(lines, 0, lines[0].indent);
+  const [value, endIndex] = parseBlock(lines, 0, lines[0].indent);
+  if (requireComplete && (endIndex !== lines.length || !Array.isArray(value))) throw new Error('复杂补丁无法由本地解析器完整判断，请使用独立测试 profile');
   return Array.isArray(value) ? value : [value];
 }
 
@@ -44,6 +45,10 @@ function isSeq(line) { return line.text.startsWith('- ') || line.text === '-'; }
 /** 在给定缩进上解析一个块（序列或映射），返回 [value, nextIndex]。 */
 function parseBlock(lines, i, indent) {
   if (i >= lines.length) return [null, i];
+  // DSH's shipped profile template is comments followed by a standalone [].
+  // Consume exactly that line so requireComplete still rejects trailing data.
+  // This does not claim support for arbitrary flow-style YAML documents.
+  if (/^\[\s*\]$/.test(lines[i].text)) return [[], i + 1];
   return isSeq(lines[i]) ? parseSeq(lines, i, indent) : parseMap(lines, i, indent);
 }
 

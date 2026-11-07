@@ -1,0 +1,86 @@
+{
+  "version": "0.3.0-preview.5",
+  "checkedAt": "2026-11-07T18:38:53.370Z",
+  "zipSha256": "931cb55bbe71172c7208a74ed7fc60b12cc89c983579183cfbf0cff68f38ee17",
+  "zipBytes": 9976074,
+  "files": 152,
+  "node": "v24.22.1",
+  "checks": [
+    {
+      "name": "unit",
+      "exitCode": 0
+    },
+    {
+      "name": "rc5-real-host",
+      "exitCode": 0
+    },
+    {
+      "name": "rc5-real-loader",
+      "exitCode": 0
+    },
+    {
+      "name": "rc5-real-cordis",
+      "exitCode": 0
+    },
+    {
+      "name": "rc5-real-room",
+      "exitCode": 0
+    },
+    {
+      "name": "rc5-real-boot",
+      "exitCode": 0
+    },
+    {
+      "name": "rc2-real-host",
+      "exitCode": 0
+    },
+    {
+      "name": "rc2-real-loader",
+      "exitCode": 0
+    },
+    {
+      "name": "rc2-real-cordis",
+      "exitCode": 0
+    },
+    {
+      "name": "rc2-real-room",
+      "exitCode": 0
+    },
+    {
+      "name": "rc2-real-boot",
+      "exitCode": 0
+    },
+    {
+      "name": "smoke",
+      "exitCode": 0
+    },
+    {
+      "name": "smoke-noprompt",
+      "exitCode": 0
+    }
+  ],
+  "unitSummary": [
+    "ℹ tests 199",
+    "ℹ pass 199",
+    "ℹ fail 0",
+    "ℹ skipped 0"
+  ],
+  "hostVersions": [
+    "0.2.0-rc.2",
+    "0.2.1-rc.5"
+  ],
+  "liveProfileModified": false,
+  "modelRequests": 0,
+  "currentChecks": {
+    "coldPackageTests": true,
+    "sourceAndZipMatch": true,
+    "releaseChecks": true,
+    "changedSincePreparedPackage": [
+      "dsh-hippocampus/CHANGELOG.md",
+      "dsh-hippocampus/tests/smoke-host.mjs",
+      "dsh-hippocampus/tests/smoke-noprompt.mjs"
+    ]
+  },
+  "limitations": "Isolated verification does not cover long-running real AI behavior or every third-party plugin combination.",
+  "publicReleaseCreated": false
+}

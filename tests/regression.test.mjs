@@ -26,7 +26,7 @@ function mount(t, state = {}) {
       return () => set.delete(fn)
     },
     effect(fn) { const dispose = fn(); disposers.push(dispose); return dispose },
-  }, { homeDir: home, verbose: false })
+  }, { homeDir: home, verbose: false, scopeMode: 'shared', roomEnabled: false })
   t.after(() => disposers.reverse().forEach((fn) => fn?.()))
   return {
     call: (name, args = {}) => tools.get(name).execute(args),

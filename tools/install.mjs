@@ -24,6 +24,8 @@ import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { stagePluginLink } from './plugin-link.mjs';
+import { FIRST_USE_MESSAGE } from '../lib/onboarding.mjs';
+import { installConflicts } from './install-preflight.mjs';
 import {
   checkPlugin, checkProfile, defaultProfile, results, printResults, resetResults, readJson,
 } from './check-install.mjs';
@@ -34,7 +36,10 @@ const argv = process.argv.slice(2);
 const opt = { profile: null, plugin: null, dry: false, uninstall: false, json: false, help: false };
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i];
-  if (a === '--profile') opt.profile = argv[++i];
+  if (a === '--profile') {
+    opt.profile = argv[++i];
+    if (!opt.profile || opt.profile.startsWith('--')) { console.error('--profile 需要完整 profile 目录'); process.exit(2); }
+  }
   else if (a === '--plugin') {
     opt.plugin = argv[++i];
     if (!opt.plugin || opt.plugin.startsWith('--')) { console.error('--plugin 需要完整插件目录'); process.exit(2); }
@@ -56,7 +61,9 @@ if (opt.help) {
 
 不传 --profile 时按顺序找：$DSH_HOME、~/.dsh、%APPDATA%\\dsh-desktop\\harness、$XDG_CONFIG_HOME/dsh-desktop/harness
 （在其下的 profiles/ 里优先取 web，其次 desktop，再到第一个带 package.json 的）。
-只改 profile 的 package.json 与 node_modules 链接；记忆库与日志都不动。`);
+只改 profile 的 package.json 与 node_modules 链接；记忆库与日志都不动。
+小屋预览版实际安装必须明确传 --profile，不自动覆盖日常使用的环境。
+先运行 tools/preview-room.cmd 可独立看效果。`);
   process.exit(0);
 }
 
@@ -64,23 +71,33 @@ const say = (...a) => { if (!opt.json) console.log(...a); };
 const toPosix = (p) => p.replace(/\\/g, '/');
 const stamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
 
-function fail(msg, detail) {
-  if (opt.json) console.log(JSON.stringify({ ok: false, error: msg, detail }, null, 2));
-  else { console.error(`✗ ${msg}${detail ? '：' + detail : ''}`); }
+function fail(msg, detail, nextSteps) {
+  if (opt.json) console.log(JSON.stringify({ ok: false, error: msg, detail, nextSteps }, null, 2));
+  else { console.error(`✗ ${msg}${detail ? '：' + detail : ''}`); if(nextSteps)for(const step of nextSteps)console.error('  '+step); }
   process.exit(1);
 }
+const previewNextSteps = [
+  '只看效果：运行 tools/preview-room.cmd；不会安装到 DSH。',
+  '新建测试环境：先确认 hp-memory-test 这个 profile 尚不存在。已安装 DSH CLI 时运行 dsh hp-memory-test --from-default-profile web --dump-config。不要对日常 web 使用重建参数。',
+  '桌面版启动器路径及独立 homeDir 示例见 docs/LOCAL-TRIAL.md；同一 DSH_HOME 下的会话列表和定时任务仍共享。',
+  '准备好测试配置后运行 node tools/install.mjs --profile "<DSH_HOME>/profiles/hp-memory-test" --dry；检查通过再去掉 --dry。',
+  '要保留旧记忆：先 node tools/migrate.mjs --from "<旧 brain.json>" --list；按 docs/MIGRATE-SPACES.md 复制到新目录，不要删除旧库。',
+];
 
 /* ── 1. 本包 ─────────────────────────────────────────────────────────── */
 let pkg;
 try { pkg = readJson(path.join(PLUGIN_DIR, 'package.json')); } catch (e) { fail('读不到本包的 package.json', e.message); }
 if (pkg.name !== 'dsh-hippocampus') fail('指定目录不是 dsh-hippocampus 插件包');
-if (opt.plugin) {
+const supportsSpaceSetup = fs.existsSync(path.join(PLUGIN_DIR, 'lib', 'spaces.mjs'));
+if (!opt.uninstall) {
   resetResults();
   const targetInfo = checkPlugin(PLUGIN_DIR);
   const targetErrors = results.filter(row => row.level === 'bad');
   if (!targetInfo || targetErrors.length) fail('指定插件目录不完整，未修改安装登记', targetErrors.map(row => row.title).join('；'));
   resetResults();
 }
+const roomPreview = /^0\.3\.0-preview\./.test(pkg.version || '');
+if (roomPreview && !opt.profile && !opt.dry && !opt.uninstall) fail('小屋预览版需要显式指定测试 profile', '本次没有改动安装登记', previewNextSteps);
 
 /* ── 2. profile ──────────────────────────────────────────────────────── */
 const profileDir = opt.profile ? path.resolve(opt.profile) : defaultProfile();
@@ -91,6 +108,11 @@ if (!fs.existsSync(profilePkgPath)) fail('profile 里没有 package.json', profi
 let ppkg;
 try { ppkg = readJson(profilePkgPath); } catch (e) { fail('profile 的 package.json 解析失败', e.message); }
 const profileName = path.basename(profileDir);
+if(roomPreview&&!opt.uninstall){
+  let conflicts;
+  try{conflicts=installConflicts(profileDir,PLUGIN_DIR,ppkg);}catch{fail('无法可靠解析安装配置，未修改任何登记','本版支持官方注释 + [] 空模板；复杂 YAML / 表达式超出本地解析范围时仍拒绝安装，不会删除原补丁',previewNextSteps);}
+  if(conflicts.length)fail('安装前检查发现配置冲突，未修改任何登记',conflicts.join('；'),previewNextSteps);
+}
 
 /* ── 3. 计划 ─────────────────────────────────────────────────────────── */
 const plan = [];
@@ -248,12 +270,17 @@ if (opt.json) {
     changed: changedFiles,
     plan: effective,
     results,
+    ...(supportsSpaceSetup ? { firstUse: { message: FIRST_USE_MESSAGE, nextTool: 'hp_space' } } : {}),
   }, null, 2));
 } else {
   printResults();
   console.log('');
   if (!bads.length) {
     console.log(`✓ 安装登记与静态自检通过${warns.length ? `（${warns.length} 条注意项）` : ''}。请重启 DSH，并确认 hp_* 工具已激活；本检查不代替宿主启动验证。`);
+    if (supportsSpaceSetup) {
+      console.log('首次使用：' + FIRST_USE_MESSAGE);
+      console.log('  默认 bound 模式：在每只鱼的会话中调用 hp_space，打开完整设置链接并确认归属；未选择前不会读写记忆。');
+    }
     if (changedFiles.length) console.log(`  改动：${changedFiles.join('、')}`);
   } else {
     console.log(`✗ 还有 ${bads.length} 项没过——按上面 → 的提示改，或把这段输出贴出来。`);

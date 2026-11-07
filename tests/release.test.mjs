@@ -33,6 +33,13 @@ function fixture() {
 }
 const details = (result) => result.results.filter((r) => r.level === 'bad').map((r) => r.detail).join('\n')
 
+test('room saves and binding registries never enter a package; bundled artwork has a bounded size allowance',()=>{
+  for(const name of ['room/rooms.json','lib/spaces.json','room/room-preview.lock'])assert.ok(inspectFiles(new Map([[name,Buffer.from('{}')]])).length>0);
+  assert.equal(inspectFiles(new Map([['room/assets/dayu.png',Buffer.alloc(2*1024*1024)]])).length,0);
+  assert.ok(inspectFiles(new Map([['lib/oversized.js',Buffer.alloc(2*1024*1024)]])).length>0);
+  assert.ok(inspectFiles(new Map([['room/assets/dayu.png',Buffer.alloc(5*1024*1024)]])).length>0);
+});
+
 test('最终 ZIP 与清单、源码逐字节一致时通过，包括 GitHub 工作流', () => {
   const f = fixture()
   const r = f.check()
@@ -107,7 +114,7 @@ test('读取恶意 ZIP 时拒绝路径穿越、符号链接、加密与过大解
   assert.throws(() => readZip(symlink), /符号链接/)
   const encrypted = Buffer.from(original); encrypted.writeUInt16LE(0x801, central + 8)
   assert.throws(() => readZip(encrypted), /加密/)
-  const large = Buffer.from(original); large.writeUInt32LE(1024 * 1024 + 1, central + 24)
+  const large = Buffer.from(original); large.writeUInt32LE(4 * 1024 * 1024 + 1, central + 24)
   assert.throws(() => readZip(large), /大小超过/)
 })
 

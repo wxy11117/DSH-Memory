@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#eaf2f6"/>
+  <meta name="description" content="给大肥鱼一间面朝大海的小屋。在这里散步、睡个好觉，听海风慢慢经过。"/>
+  <title>大肥鱼的房间 · 海边慢生活</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg"/>
+  <link rel="stylesheet" href="./style.css"/>
+  <link rel="stylesheet" href="./observatory.css"/>
+  <link rel="stylesheet" href="./memory-panel.css"/>
+  <link rel="stylesheet" href="./connection.css"/>
+  <link rel="stylesheet" href="./settings.css"/>
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/"}}</script>
+</head>
+<body>
+  <div id="app" hidden>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="大肥鱼的房间，回到默认视角" id="brand-home"><span class="brand-mark" data-icon="whale"></span><span><span class="brand-title">大肥鱼的房间<span class="tiny-star">✦</span></span><span class="brand-subtitle">一间小屋，一整片海。</span></span></a>
+      <div class="top-tools"><button id="weather-pill" class="weather-pill" aria-label="打开天气设置"><span data-icon="sun" id="weather-mini-icon"></span><span id="top-weather">晴朗</span><span class="divider"></span><span id="top-temp">24°</span><span id="top-clock">14:20</span></button><button class="icon-button" id="sound-button" title="开启海浪声" aria-label="开启海浪声" aria-pressed="false"><span data-icon="mute"></span></button><button class="icon-button" id="music-button" data-interact="music" aria-label="打开钢琴轻音乐播放器" title="柔和的钢琴轻音乐" aria-haspopup="dialog" aria-pressed="false"><span data-icon="music"></span></button><button class="icon-button" id="photo-button" title="保存小屋照片" aria-label="保存小屋照片"><span data-icon="camera"></span></button><button class="icon-button" id="help-button" title="玩法说明" aria-label="玩法说明"><span data-icon="help"></span></button></div>
+    </header>
+    <main id="scene-wrap" aria-label="可互动的海边房间">
+      <canvas id="scene" tabindex="0" aria-label="3D 小屋与动漫人物。点击地面移动，点击床睡觉、电脑屏幕打开小电脑。上方按钮切换整屋与阁楼，下方按钮安排日常活动。"></canvas>
+      <div class="scene-heading"><span class="eyebrow">DAYU'S SEASIDE HOME</span><div class="scene-title">今天，也慢慢来。<span class="soft-line"></span></div><p id="scene-caption">阳光刚好，海风也刚好。</p></div>
+      <nav class="house-views" aria-label="小屋查看方式"><button id="house-view-toggle" aria-pressed="false"><span data-icon="home"></span><span id="house-view-label">看看整座小屋</span></button><button id="attic-view" aria-pressed="false"><span data-icon="book"></span><span>去阁楼</span></button><button id="explore-button" aria-pressed="false"><span data-icon="sparkle"></span><span>发现互动</span></button><span id="view-location">1F · 海风房间</span></nav>
+      <div class="view-tools"><button class="icon-button" id="reset-camera" title="回到默认视角" aria-label="回到默认视角"><span data-icon="home"></span></button><button class="icon-button" id="zoom-in" title="放大" aria-label="放大">＋</button><button class="icon-button" id="zoom-out" title="缩小" aria-label="缩小">−</button><button class="icon-button" id="immersive-button" title="沉浸观赏" aria-label="沉浸观赏"><span data-icon="expand"></span></button></div>
+      <div id="speech" class="speech hidden" role="status"><span id="speech-text"></span></div>
+      <div id="tooltip" class="scene-tooltip hidden"></div>
+      <div class="scene-hint" id="scene-hint"><span class="hint-dot"></span>点击地面走动<span>·</span>拖动旋转<span>·</span>滚轮缩放</div>
+      <div id="loading" class="loading"><span class="loading-whale" data-icon="whale"></span><b>海风正在抵达…</b><span>给大肥鱼的小屋点一盏灯</span></div>
+      <div id="render-error" class="render-error hidden" role="alert"><b>小屋暂时无法显示</b><p>需要支持 WebGL 2 的浏览器。请在 Edge / Chrome 中打开，并启用硬件加速。</p><button onclick="location.reload()" class="primary-button">重新打开</button></div>
+    </main>
+    <aside class="control-panel" id="control-panel" aria-label="小屋设置">
+      <div class="panel-tabs" role="tablist" aria-label="小屋设置分类"><button role="tab" id="tab-life" aria-controls="panel-life" aria-selected="true" data-tab="life"><span data-icon="sun"></span>小屋日常</button><button role="tab" id="tab-decor" aria-controls="panel-decor" aria-selected="false" data-tab="decor"><span data-icon="grid"></span>布置房间</button></div>
+      <div class="panel-scroll">
+        <section id="panel-life" role="tabpanel" aria-labelledby="tab-life">
+          <div class="section-heading"><h2>窗外的天气</h2><span class="micro-label">给今天换个心情</span></div>
+          <div class="weather-grid" aria-label="天气"><button data-weather="sunny" class="choice selected" aria-pressed="true"><span data-icon="sun"></span>晴天</button><button data-weather="cloudy" class="choice" aria-pressed="false"><span data-icon="cloud"></span>多云</button><button data-weather="rainy" class="choice" aria-pressed="false"><span data-icon="rain"></span>小雨</button><button data-weather="snowy" class="choice" aria-pressed="false"><span data-icon="snow"></span>飘雪</button></div>
+          <div class="temp-line"><label for="temperature"><span data-icon="thermo"></span>海边气温</label><output id="temp-output" for="temperature">24 <small>°C</small></output></div><input type="range" id="temperature" min="-5" max="35" value="24" aria-label="海边气温"/><div class="range-ends"><span>清凉</span><span>暖洋洋</span></div>
+          <div class="heating-card" id="heating-card"><label class="toggle-row"><span class="label-icon"><span data-icon="thermo"></span>卧室的小暖气</span><input type="checkbox" id="heater-toggle" role="switch"/><span class="switch"></span></label><div class="heating-reading"><span>室内 <small>模拟温度</small></span><strong id="room-temperature">20.0°</strong></div><label class="heater-target-label" for="heater-target">期待的温度 <output id="heater-target-value">24 °C</output></label><input type="range" id="heater-target" min="16" max="28" step="1" value="24"/><p id="heater-status" role="status">已关闭 · 室温随环境缓慢变化</p></div>
+          <div class="section-heading time-heading"><h2>此刻的时光</h2><span data-icon="clock"></span></div>
+          <div class="time-grid" aria-label="时间"><button data-time="morning" aria-pressed="false"><span data-icon="sun"></span>清晨</button><button data-time="afternoon" class="selected" aria-pressed="true"><span data-icon="sun"></span>午后</button><button data-time="sunset" aria-pressed="false"><span data-icon="sunset"></span>黄昏</button><button data-time="night" aria-pressed="false"><span data-icon="moon"></span>深夜</button></div>
+          <label class="toggle-row"><span>跟随现实时间<small>和你一起，日出日落</small></span><input type="checkbox" id="real-time" role="switch"/><span class="switch"></span></label>
+          <div class="balcony-card"><div class="balcony-drawing" aria-hidden="true"><svg viewBox="0 0 250 74"><path d="M0 39Q40 25 80 39T160 39T250 39V74H0Z" fill="#d9eaee"/><path d="M0 51Q40 37 80 51T160 51T250 51V74H0Z" fill="#bddce4"/><path d="M0 65Q40 51 80 65T160 65T250 65V74H0Z" fill="#9bc9d8"/><path d="M172 32h31l-6 8h-19z" fill="#598399"/><path d="M188 7v25h-17z" fill="#fffaf1"/><path d="m191 14 12 18h-12z" fill="#e9ca9a"/><circle cx="37" cy="18" r="11" fill="#f2d8a6"/></svg></div><div class="balcony-copy"><h3>把海风请进来</h3><p id="balcony-description">打开阳台，看看慢悠悠的小船。</p><button class="balcony-button" id="balcony-toggle"><span data-icon="door"></span><span id="balcony-label">打开阳台</span><span data-icon="arrow"></span></button></div></div>
+          <label class="toggle-row"><span class="label-icon"><span data-icon="lamp"></span>温柔的小夜灯</span><input type="checkbox" id="lamp-toggle" role="switch"/><span class="switch"></span></label>
+          <label class="toggle-row"><span class="label-icon"><span data-icon="heart"></span>大肥鱼自由活动</span><input type="checkbox" id="auto-toggle" role="switch"/><span class="switch"></span></label>
+          <button class="life-feature kitchen-entry" data-interact="fridge"><span class="life-feature-icon" data-icon="fridge"></span><span><b>去阁楼，找一点好吃的</b><small id="kitchen-summary">十二种食物 · 三份暖心食谱</small></span><span data-icon="arrow"></span></button>
+          <button class="life-feature observatory-entry" data-interact="telescope"><span class="life-feature-icon" data-icon="sparkle"></span><span><b>阁楼望远镜 · 海与星光</b><small>看小船 · 按真实星表寻找星星</small></span><span data-icon="arrow"></span></button>
+          <div class="section-heading time-heading"><h2>小屋里的小日常</h2><span class="micro-label">也可以直接点物件</span></div>
+          <div class="interaction-grid"><button data-interact="computer-screen"><span data-icon="monitor"></span>打开电脑屏幕</button><button data-interact="curtains"><span data-icon="door"></span><span id="curtain-label">拉上窗帘</span></button><button data-interact="water"><span data-icon="leaf"></span>给绿植浇水</button><button data-interact="read"><span data-icon="book"></span>读一页小书</button></div>
+          <div class="life-extras"><button class="life-feature" data-interact="music"><span class="life-feature-icon" data-icon="music"></span><span><b>让钢琴陪海风坐一会儿</b><small id="music-current">三首钢琴 · 等你轻轻按下播放</small></span><span data-icon="arrow"></span></button><button class="life-feature" data-interact="feed"><span class="life-feature-icon" data-icon="fish"></span><span><b>给小鱼一点点心</b><small id="fish-care-label">三条小鱼，等一口小点心</small></span><span data-icon="arrow"></span></button><button class="life-feature" data-interact="chime"><span class="life-feature-icon" data-icon="bell"></span><span><b>轻轻碰一下风铃</b><small>听海风留下的一声清响</small></span><span data-icon="arrow"></span></button></div><p class="panel-note"><span data-icon="check"></span><span id="save-note">小屋的变化会自动记住</span></p>
+        </section>
+        <section id="panel-decor" role="tabpanel" aria-labelledby="tab-decor" hidden>
+          <div class="section-heading"><h2>我的小家具</h2><span class="micro-label" id="furniture-count">10 件</span></div><p class="decor-help">选一件家具，拖动到喜欢的位置。<br/>也可以点击空地放置，按 R 旋转。</p>
+          <div id="furniture-list" class="furniture-list"></div>
+          <div id="selected-furniture" class="selected-furniture hidden"><div class="selected-heading"><span id="selected-name"></span><span class="micro-label">已选中</span></div><div class="furniture-actions"><button id="rotate-furniture"><span data-icon="rotate"></span>旋转</button><button id="store-furniture"><span data-icon="box"></span>收纳</button></div><div class="nudge-controls" aria-label="微调家具位置"><button data-nudge="left" aria-label="向左移动">←</button><button data-nudge="back" aria-label="向后移动">↑</button><button data-nudge="front" aria-label="向前移动">↓</button><button data-nudge="right" aria-label="向右移动">→</button></div></div>
+          <button id="finish-decor" class="primary-button wide"><span data-icon="check"></span>布置好了</button><button id="reset-layout" class="text-button"><span data-icon="reset"></span>恢复初始布置</button><p class="panel-note"><span data-icon="box"></span>已收纳的家具可以随时取出</p>
+        </section>
+      </div>
+    </aside>
+    <div class="character-card"><div class="avatar"><img src="./assets/dayu.png" alt="蓝发鲸鱼女仆大肥鱼"/></div><div class="character-info"><div class="character-name">大肥鱼 <span class="online-dot"></span></div><div id="character-status">在家发呆也很幸福</div><div class="energy-line"><span data-icon="heart"></span><div class="energy-track"><i id="energy-bar"></i></div><span id="energy-label">心情很好</span></div></div></div>
+    <nav class="action-dock" aria-label="和大肥鱼互动"><button data-action="idle" class="active" aria-pressed="true"><span data-icon="walk"></span><span>走一走</span></button><button data-action="sleep" aria-pressed="false"><span data-icon="bed"></span><span>睡个好觉</span></button><button data-action="computer" aria-pressed="false"><span data-icon="monitor"></span><span>玩电脑</span></button><span class="dock-divider"></span><button data-action="tea" aria-pressed="false"><span data-icon="cup"></span><span>歇一会儿</span></button><button data-action="sea" aria-pressed="false"><span data-icon="sea"></span><span>去看海</span></button></nav>
+    <button id="exit-immersive" class="exit-immersive hidden"><span data-icon="close"></span>退出观赏</button>
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+    <dialog id="help-dialog"><button class="dialog-close icon-button" aria-label="关闭玩法说明"><span data-icon="close"></span></button><span class="dialog-whale" data-icon="whale"></span><span class="eyebrow">WELCOME HOME</span><h2>欢迎回家，大肥鱼。</h2><p>这里不用赶时间。把小屋布置成你喜欢的样子，<br/>然后，陪她一起听听海。</p><div class="help-grid"><div><span data-icon="walk"></span><b>散步与互动</b><span>点击地面走过去。点「发现互动」查看入口，电脑、鱼缸、风铃与音箱都可以玩。</span></div><div><span data-icon="move"></span><b>看看小屋</b><span>拖动空白处旋转，滚轮缩放；触屏用双指缩放，点小房子恢复视角。</span></div><div><span data-icon="grid"></span><b>布置与收纳</b><span>在布置面板选择家具，拖动或点击地面放置；R 旋转，Esc 取消选择。</span></div><div><span data-icon="sea"></span><b>出门看海</b><span>打开阳台门，走到海风里。天气与温度是可自由设定的小屋环境。</span></div></div><button class="primary-button wide dialog-close">好，今天就慢慢来</button></dialog>
+  </div>
+  <dialog id="story-dialog" class="story-dialog"><button class="icon-button story-close" aria-label="合上小书"><span data-icon="close"></span></button><span data-icon="book" class="dialog-whale"></span><span class="eyebrow">A LITTLE SEASIDE STORY</span><h2 id="story-title"></h2><p id="story-content"></p><button class="primary-button wide story-close">把这一刻记在心里</button></dialog>
+  <script type="module" src="./src/bootstrap.js"></script>
+</body>
+</html>

@@ -1,3 +1,7 @@
+本文件下方保留 0.2.0 旧版看板的安装记录，不能直接当作 0.3.0 的升级步骤。0.3.0-preview.5 请先阅读 [LOCAL-TRIAL.md](LOCAL-TRIAL.md)、[旧记忆迁移](MIGRATE-SPACES.md) 和 [地址获取](LOCAL-ENDPOINTS.md)。
+
+**当前版隔离边界：**不同 profile 共用 DSH_HOME 时仍共享 sessions/ 和 storages/（会话列表、定时任务及工作区设置）。短期试验不要改这些共享项；长期完全隔离请单独设置 DSH_HOME。插件的 homeDir 也应独立。看板、小屋在独立随机本地端口，通过 hp_dashboard / hp_room 的返回地址访问。
+
 # 0.2.0-preview.3 试安装说明
 
 本包包含记忆插件和本地活动面板。下载、解压本身不会修改 DSH；运行安装脚本才会切换插件登记。当前为预览测试版，公开发布状态以仓库 Releases 为准。

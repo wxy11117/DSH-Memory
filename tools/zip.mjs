@@ -1,7 +1,8 @@
 /** Bounded ZIP reader/writer for releases. Never extracts or executes archive contents. */
 import { deflateRawSync, inflateRawSync } from 'node:zlib'
 
-const MAX_FILE = 1024 * 1024, MAX_TOTAL = 64 * 1024 * 1024
+// Room textures need up to 4 MiB; release-files still caps ordinary source at 1 MiB.
+const MAX_FILE = 4 * 1024 * 1024, MAX_TOTAL = 64 * 1024 * 1024
 const table = Uint32Array.from({ length: 256 }, (_, n) => {
   for (let i = 0; i < 8; i++) n = (n >>> 1) ^ ((n & 1) ? 0xedb88320 : 0)
   return n >>> 0
